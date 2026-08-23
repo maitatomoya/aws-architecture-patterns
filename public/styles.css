@@ -1,0 +1,529 @@
+/* AWS Architecture Patterns スタイル */
+:root {
+  --rust-orange: #ec7211;
+  --rust-orange-dark: #b35309;
+  --bg: #ffffff;
+  --bg-side: #f6f4f2;
+  --text: #2b2b2b;
+  --text-sub: #6b6b6b;
+  --border: #e2ddd8;
+  --code-bg: #f4f1ee;
+  --ok: #1a7f37;
+  --warn: #9a6700;
+  --err: #c0392b;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic",
+    "Noto Sans JP", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.75;
+}
+
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+/* ---- サイドバー ---- */
+#sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  background: var(--bg-side);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+#sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+#sidebar-header h1 {
+  margin: 0 0 10px;
+  font-size: 20px;
+  color: var(--rust-orange);
+}
+
+#progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#progress-bar {
+  flex: 1;
+  height: 8px;
+  background: #e6e0da;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#progress-fill {
+  height: 100%;
+  width: 0;
+  background: var(--rust-orange);
+  transition: width 0.3s;
+}
+
+#progress-label {
+  font-size: 12px;
+  color: var(--text-sub);
+  white-space: nowrap;
+}
+
+#toc {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.toc-chapter summary {
+  cursor: pointer;
+  padding: 6px 16px;
+  font-weight: 600;
+  font-size: 13px;
+  user-select: none;
+}
+
+.toc-chapter summary:hover { background: #eee8e2; }
+.toc-chapter summary.done { color: var(--ok); }
+
+.toc-chapter ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 4px;
+}
+
+.toc-step {
+  display: block;
+  padding: 4px 16px 4px 32px;
+  font-size: 12.5px;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toc-step:hover { background: #eee8e2; }
+.toc-step.done { color: var(--ok); }
+.toc-step.done::before { content: "✓ "; }
+.toc-step.active {
+  background: var(--rust-orange);
+  color: #fff;
+}
+
+#sidebar-footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+/* ---- メイン ---- */
+#main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 40px 80px;
+}
+
+#step-view { max-width: 860px; margin: 0 auto; }
+
+#step-breadcrumb {
+  color: var(--text-sub);
+  font-size: 13px;
+  margin: 0 0 4px;
+}
+
+#step-title {
+  margin: 0 0 20px;
+  font-size: 26px;
+  border-bottom: 3px solid var(--rust-orange);
+  padding-bottom: 8px;
+}
+
+/* 解説エリア */
+#explanation h4 {
+  margin: 20px 0 8px;
+  font-size: 16px;
+  color: var(--rust-orange-dark);
+}
+
+#explanation p { margin: 10px 0; }
+
+#explanation code, #task-box code {
+  background: var(--code-bg);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.88em;
+}
+
+#explanation pre {
+  background: #2b2b2b;
+  color: #eee;
+  padding: 14px 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+#explanation pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+#explanation table {
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 14px;
+  width: 100%;
+}
+
+#explanation th, #explanation td {
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  text-align: left;
+}
+
+#explanation th { background: var(--bg-side); }
+
+/* 課題ボックス */
+#task-box {
+  background: #fff7f2;
+  border: 1px solid #f0c9b5;
+  border-left: 5px solid var(--rust-orange);
+  border-radius: 8px;
+  padding: 12px 18px;
+  margin: 24px 0;
+}
+
+#task-box h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  color: var(--rust-orange-dark);
+}
+
+#task-box p { margin: 0; }
+
+/* エディタ */
+#editor-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+button {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  color: var(--text);
+}
+
+button:hover { background: var(--bg-side); }
+
+button.primary {
+  background: var(--rust-orange);
+  border-color: var(--rust-orange);
+  color: #fff;
+  font-weight: 600;
+}
+
+button.primary:hover { background: var(--rust-orange-dark); }
+button:disabled { opacity: 0.6; cursor: wait; }
+
+#editor-host .CodeMirror {
+  height: auto;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  line-height: 1.6;
+  padding: 6px 0;
+}
+
+/* 高さの下限は内側のスクロール領域に指定する（本体に指定すると空箱が見える） */
+#editor-host .CodeMirror-scroll {
+  min-height: 200px;
+}
+
+#code-editor {
+  width: 100%;
+  min-height: 260px;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  background: #212121;
+  color: #eee;
+  border: none;
+  border-radius: 8px;
+  padding: 14px;
+  resize: vertical;
+}
+
+/* ヒント・模範解答 */
+#hints-box {
+  background: #fffbe6;
+  border: 1px solid #e6d98a;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+#hints-box p { margin: 6px 0; }
+
+#solution-box {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: var(--bg-side);
+}
+
+#solution-box h4 { margin: 0 0 8px; }
+
+#solution-box pre {
+  background: #2b2b2b;
+  color: #eee;
+  padding: 12px 14px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  line-height: 1.6;
+}
+
+/* 出力 */
+#output-section {
+  margin-top: 24px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+}
+
+#output-section h3 {
+  font-size: 13px;
+  margin: 12px 0 6px;
+  color: var(--text-sub);
+}
+
+#output-section pre {
+  background: #1e1e1e;
+  color: #ddd;
+  padding: 12px 14px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+#compiler-output { color: #f0b27a; }
+
+#output-status {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.status-ok { color: var(--ok); }
+.status-warn { color: var(--warn); }
+.status-err { color: var(--err); }
+.status-running { color: var(--text-sub); }
+
+/* ステップ移動 */
+#step-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  gap: 12px;
+}
+
+#done-toggle {
+  font-size: 14px;
+  color: var(--text-sub);
+  user-select: none;
+  cursor: pointer;
+}
+
+.placeholder {
+  max-width: 860px;
+  margin: 60px auto;
+  color: var(--text-sub);
+}
+
+/* 狭い画面 */
+@media (max-width: 800px) {
+  #app { flex-direction: column; height: auto; }
+  #sidebar {
+    width: 100%;
+    max-height: 40vh;
+  }
+  #main { padding: 20px 16px 60px; }
+}
+
+/* 「はじめに」（言語紹介）ページ */
+.toc-intro {
+  display: block;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--rust-orange-dark);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+}
+
+.toc-intro:hover { background: #eee8e2; }
+.toc-intro.active {
+  background: var(--rust-orange);
+  color: #fff;
+}
+
+.intro-page {
+  max-width: 860px;
+  margin: 0 auto;
+  color: var(--text);
+  line-height: 1.85;
+}
+
+.intro-page h2 {
+  font-size: 26px;
+  border-bottom: 3px solid var(--rust-orange);
+  padding-bottom: 8px;
+  margin-top: 0;
+}
+
+.intro-page h3 {
+  color: var(--rust-orange-dark);
+  margin: 30px 0 10px;
+  font-size: 19px;
+}
+
+.intro-page p { margin: 10px 0; }
+
+.intro-page table {
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 14px;
+  width: 100%;
+}
+
+.intro-page th, .intro-page td {
+  border: 1px solid var(--border);
+  padding: 7px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.intro-page th { background: var(--bg-side); }
+
+.intro-page code {
+  background: var(--code-bg);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.88em;
+}
+
+.intro-page ul, .intro-page ol { padding-left: 24px; }
+.intro-page li { margin: 6px 0; }
+
+.intro-page .intro-note {
+  background: var(--bg-side);
+  border-left: 5px solid var(--rust-orange);
+  border-radius: 6px;
+  padding: 12px 18px;
+  margin: 16px 0;
+}
+
+.intro-page button {
+  margin-top: 24px;
+  font-size: 16px;
+  padding: 12px 28px;
+}
+
+/* ---- AWS Architecture Patterns 専用 ---- */
+#case-view { max-width: 980px; margin: 0 auto; line-height: 1.85; }
+#case-breadcrumb { color: var(--text-sub); font-size: 13px; margin: 0 0 4px; }
+#case-view h2 {
+  margin: 0 0 20px; font-size: 26px;
+  border-bottom: 3px solid var(--rust-orange); padding-bottom: 8px;
+}
+#case-view h3 { color: var(--rust-orange-dark); margin: 26px 0 10px; font-size: 19px; }
+#case-view h4 { margin: 18px 0 8px; font-size: 15px; }
+#case-view section { margin-bottom: 8px; }
+
+.scenario { background: var(--bg-side); border-radius: 8px; padding: 12px 18px; }
+.pattern { border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
+.pattern-main { border-color: var(--rust-orange); border-width: 2px; }
+.pattern h3 { margin-top: 0; }
+.pattern-when {
+  background: #fff7f0; border-left: 4px solid var(--rust-orange);
+  padding: 8px 12px; border-radius: 4px; font-size: 14px;
+}
+
+.diagram-wrap { overflow-x: auto; margin: 14px 0; }
+.dg { min-width: 640px; width: 100%; height: auto; }
+.dg-label { font-size: 12px; fill: #16191f; }
+.dg-group-label { font-size: 12px; font-weight: 600; }
+.dg-edge-label { font-size: 11px; fill: #545b64; }
+/* ラベルに白フチを付け、線や枠と交差しても読めるようにする */
+.dg-label, .dg-group-label, .dg-edge-label {
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.pattern-cost {
+  background: var(--bg-side); border-radius: 6px;
+  padding: 8px 14px; font-size: 14px; margin: 6px 0;
+}
+
+/* 公式ドキュメント・参考資料 */
+.ref-list { margin: 0; padding-left: 20px; font-size: 14px; }
+.ref-list li { margin: 5px 0; }
+.ref-list a { color: var(--rust-orange-dark); }
+.ref-list a:hover { color: var(--rust-orange); }
+.ref-list .ref-note { color: var(--text-sub); font-size: 13px; }
+
+.svc-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+.svc-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+}
+.svc-item img { flex-shrink: 0; }
+.svc-name { font-weight: 600; font-size: 14px; }
+.svc-role { font-size: 13px; color: var(--text-sub); }
+
+.pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.pros-cons h4 { margin-top: 0; }
+.pros { background: #f2f8ec; border-radius: 8px; padding: 10px 16px; }
+.cons { background: #fdf1f1; border-radius: 8px; padding: 10px 16px; }
+.pros-cons ul { margin: 0; padding-left: 20px; font-size: 14px; }
+.pros-cons li { margin: 5px 0; }
+@media (max-width: 700px) { .pros-cons { grid-template-columns: 1fr; } }
+
+.cost, .case-summary { background: var(--bg-side); border-radius: 8px; padding: 12px 18px; }
+#case-nav { display: flex; justify-content: space-between; align-items: center; margin: 30px 0 10px; gap: 12px; }

@@ -129,6 +129,9 @@
       html += '<div class="cons"><h4>デメリット・注意点</h4>' + listHtml(p.cons) + "</div>";
       html += "</div>";
     }
+    if (p.cost) {
+      html += '<h4>費用感の目安</h4><p class="pattern-cost">' + h(p.cost) + "</p>";
+    }
     if (p.references) {
       html += "<h4>公式ドキュメント・参考資料</h4>" + refsHtml(p.references);
     }

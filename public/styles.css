@@ -496,6 +496,11 @@ button:disabled { opacity: 0.6; cursor: wait; }
   stroke-linejoin: round;
 }
 
+.pattern-cost {
+  background: var(--bg-side); border-radius: 6px;
+  padding: 8px 14px; font-size: 14px; margin: 6px 0;
+}
+
 /* 公式ドキュメント・参考資料 */
 .ref-list { margin: 0; padding-left: 20px; font-size: 14px; }
 .ref-list li { margin: 5px 0; }

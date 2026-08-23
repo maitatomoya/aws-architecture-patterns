@@ -64,6 +64,7 @@ registerCase({
       "キャッシュ削除の運用を知らないと「更新が反映されない」と混乱しがち",
       "CloudFront＋S3＋Route 53と登場人物が多く、初回設定はそれなりに手数がある"
     ],
+    cost: "<strong>月数十円〜数百円</strong>。S3の保存料＋CloudFrontの転送量のみの従量課金で、CloudFrontは無料枠（転送1TB/月）が大きいため小規模サイトなら無料枠内に収まることも多い。",
     references: [
       { title: "Amazon S3を使用して静的ウェブサイトをホスティングする", url: "https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/WebsiteHosting.html", note: "S3公式ユーザーガイド" },
       { title: "CloudFrontとS3で安全な静的ウェブサイトを始める", url: "https://docs.aws.amazon.com/ja_jp/AmazonCloudFront/latest/DeveloperGuide/getting-started-secure-static-website-cloudfront-s3.html", note: "この構成そのもののチュートリアル" },
@@ -93,6 +94,20 @@ registerCase({
           { from: "amplify", to: "cf2", noArrow: true, dashed: true }
         ]
       },
+      flow: [
+        "開発者がGitリポジトリにpushすると、Amplifyが検知して自動でビルド・デプロイする",
+        "ユーザーはAmplifyに内蔵されたCDN（CloudFront）経由でHTTPS配信を受ける",
+        "S3・CloudFront・証明書の設定はAmplifyが内部でまとめて面倒を見る"
+      ],
+      services: [
+        { icon: "services/amplify", name: "AWS Amplify Hosting", role: "Git連携の静的ホスティング。ビルド・CDN・HTTPS・プレビュー環境までを一体で提供" },
+        { icon: "services/cloudfront", name: "Amazon CloudFront（内蔵）", role: "Amplifyが内部で使うCDN。自分で設定する必要はない" }
+      ],
+      points: [
+        "ブランチごとにプレビューURLが自動発行されるので、公開前レビューの仕組みを自作しなくてよい",
+        "ビルド設定はリポジトリ直下のamplify.ymlで管理でき、インフラ知識が浅いメンバーでも運用に参加しやすい",
+        "凝ったキャッシュ制御やLambda@Edgeが必要になったら、推奨構成（S3+CloudFrontの手組み）への移行を検討する"
+      ],
       pros: [
         "GitHub連携でpush→ビルド→デプロイまで全自動。CDN・HTTPSも内蔵",
         "プレビュー環境（ブランチごとのURL）が自動でできる"
@@ -101,6 +116,7 @@ registerCase({
         "S3+CloudFrontよりカスタマイズの自由度が低い",
         "内部の挙動がブラックボックス寄りで、細かいキャッシュ制御はしにくい"
       ],
+      cost: "<strong>月0円〜数百円</strong>。ビルド時間（無料枠1,000分/月）＋配信量（無料枠15GB/月）の従量課金。小規模サイトならほぼ無料枠内。",
       references: [
         { title: "AWS Amplify Hostingとは", url: "https://docs.aws.amazon.com/ja_jp/amplify/latest/userguide/welcome.html", note: "Amplify公式ユーザーガイド" }
       ]
@@ -137,6 +153,18 @@ registerCase({
         "EC2はプライベートサブネットのRDSにSQLで接続する。RDSは外から直接届かない場所に置くのが定石",
         "アップロード画像はVPCの外にあるS3へ保存する（S3はサブネットの中には置けない）"
       ],
+      services: [
+        { icon: "services/ec2", name: "Amazon EC2", role: "WordPress本体（PHP+Webサーバー）が動く仮想サーバー。OSから自分で管理する" },
+        { icon: "services/rds", name: "Amazon RDS（MySQL）", role: "記事・設定を保存するマネージドDB。バックアップ・パッチはAWSが面倒を見る" },
+        { icon: "services/cloudfront", name: "Amazon CloudFront", role: "画像などをキャッシュ配信してEC2の負荷を下げる" },
+        { icon: "services/s3", name: "Amazon S3", role: "アップロード画像の保存先。EC2のディスクに置かないことでサーバーを使い捨てにできる" }
+      ],
+      points: [
+        "メディアファイルはプラグインでS3へ逃がす。EC2を「いつ作り直してもよい状態」に保つのがクラウド流",
+        "RDSはプライベートサブネットに置き、セキュリティグループでEC2からの3306番ポートのみ許可する",
+        "小規模ならEC2は1台構成で始め、成長したらALB+Auto Scaling化（別ケースで学ぶ）を検討する"
+      ],
+      cost: "<strong>月3,000円〜1万円程度</strong>（t3.small相当のEC2＋最小構成のRDS）。アクセスがなくても常時起動ぶんの固定費がかかるのが推奨構成との最大の違い。",
       pros: [
         "管理画面から誰でも更新できる（CMSの本領）",
         "WordPressの豊富なテーマ・プラグイン資産が使える"

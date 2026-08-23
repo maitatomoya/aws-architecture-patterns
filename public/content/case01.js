@@ -1,0 +1,158 @@
+// ケース1：コーポレートサイト・LP（静的サイト）
+registerCase({
+  id: 1,
+  category: "Webサイト・配信",
+  title: "コーポレートサイト・LP（静的サイト）",
+  scenario: "<p>中小企業のコーポレートサイトや、キャンペーン用のランディングページを公開したい。ページ内容は問い合わせフォームを除けばすべて静的で、更新は月に数回。アクセスは通常時は少ないが、テレビやSNSで紹介された瞬間だけ跳ね上がる可能性がある。担当エンジニアは1人（他業務と兼任）。</p>",
+  requirements: [
+    "静的コンテンツ（HTML/CSS/JS/画像）が中心",
+    "急なアクセス集中に耐えたい（バズ耐性）",
+    "月額コストはできるだけ小さく（アイドル時はほぼゼロが理想）",
+    "サーバーの保守・パッチ当てはやりたくない",
+    "独自ドメイン＋HTTPSは必須"
+  ],
+  main: {
+    name: "S3 + CloudFront 静的ホスティング",
+    diagram: {
+      cols: 5, rows: 2,
+      groups: [
+        { type: "aws-cloud", label: "AWS Cloud", from: [1, 0], to: [4, 1] }
+      ],
+      nodes: [
+        { id: "users", icon: "resources/users", label: "ユーザー", col: 0, row: 1 },
+        { id: "r53", icon: "services/route53", label: "Route 53\nDNS", col: 1, row: 0 },
+        { id: "acm", icon: "services/acm", label: "ACM\nSSL証明書", col: 2, row: 0 },
+        { id: "cf", icon: "services/cloudfront", label: "CloudFront\nCDN", col: 2, row: 1 },
+        { id: "s3", icon: "services/s3", label: "S3\n静的ファイル", col: 3, row: 1 },
+        { id: "waf", icon: "services/waf", label: "AWS WAF\n(任意)", col: 3, row: 0 }
+      ],
+      edges: [
+        { from: "users", to: "r53", label: "名前解決", dashed: true },
+        { from: "users", to: "cf", label: "HTTPS" },
+        { from: "cf", to: "s3", label: "オリジン取得" },
+        { from: "acm", to: "cf", noArrow: true, dashed: true },
+        { from: "waf", to: "cf", noArrow: true, dashed: true }
+      ]
+    },
+    flow: [
+      "ユーザーがドメインにアクセスすると、Route 53が名前解決してCloudFrontに誘導する",
+      "CloudFrontは世界中のエッジ拠点でコンテンツをキャッシュ配信する（2回目以降はS3まで行かない）",
+      "キャッシュにない場合だけ、オリジンであるS3からファイルを取得する",
+      "HTTPS証明書はACMが無料で発行し、CloudFrontに紐づける"
+    ],
+    services: [
+      { icon: "services/s3", name: "Amazon S3", role: "HTML・画像などのファイル置き場。サーバー不要で耐久性99.999999999%のストレージ" },
+      { icon: "services/cloudfront", name: "Amazon CloudFront", role: "CDN。世界中のエッジでキャッシュ配信し、表示を高速化しつつS3への負荷とコストを減らす" },
+      { icon: "services/route53", name: "Amazon Route 53", role: "DNS。独自ドメインをCloudFrontに向ける" },
+      { icon: "services/acm", name: "AWS Certificate Manager", role: "SSL/TLS証明書を無料で発行・自動更新。HTTPS化の手間をゼロにする" },
+      { icon: "services/waf", name: "AWS WAF（任意）", role: "不正なリクエストのブロック。問い合わせフォーム等を守りたい場合に追加" }
+    ],
+    points: [
+      "S3は「公開バケット」にせず、CloudFront経由のみ許可（OAC：Origin Access Control）にする。直アクセスを塞ぐのが現在の定石",
+      "キャッシュのTTLを長めに設定し、更新時はデプロイでキャッシュ削除（Invalidation）を打つ運用にすると配信コストが最小になる",
+      "バズってもCloudFrontとS3が自動で受け止めるため、事前のキャパシティ設計が不要",
+      "この図にインターネットゲートウェイやNATが無いのは省略ではない。Route 53・CloudFront・S3はVPCの外にあるAWSマネージドサービスで、ユーザーはAWSが運用する公開エンドポイントに直接アクセスする。ゲートウェイ類はVPCを使う構成（代替パターン参照）で初めて登場する"
+    ],
+    pros: [
+      "サーバー管理ゼロ（OSパッチ・スケーリングの心配がない）",
+      "アイドル時のコストがほぼゼロ（従量課金のみ。月数十円〜数百円規模）",
+      "急なアクセス集中に自動で耐える",
+      "構成が単純で、1人でも運用できる"
+    ],
+    cons: [
+      "サーバー側の動的処理はできない（問い合わせフォームは別途APIが必要）",
+      "キャッシュ削除の運用を知らないと「更新が反映されない」と混乱しがち",
+      "CloudFront＋S3＋Route 53と登場人物が多く、初回設定はそれなりに手数がある"
+    ],
+    references: [
+      { title: "Amazon S3を使用して静的ウェブサイトをホスティングする", url: "https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/WebsiteHosting.html", note: "S3公式ユーザーガイド" },
+      { title: "CloudFrontとS3で安全な静的ウェブサイトを始める", url: "https://docs.aws.amazon.com/ja_jp/AmazonCloudFront/latest/DeveloperGuide/getting-started-secure-static-website-cloudfront-s3.html", note: "この構成そのもののチュートリアル" },
+      { title: "S3オリジンへのアクセスを制限する（OAC）", url: "https://docs.aws.amazon.com/ja_jp/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html", note: "「工夫点」で触れた直アクセス対策" },
+      { title: "AWS Certificate Managerとは", url: "https://docs.aws.amazon.com/ja_jp/acm/latest/userguide/acm-overview.html" },
+      { title: "Route 53でCloudFrontディストリビューションにルーティングする", url: "https://docs.aws.amazon.com/ja_jp/Route53/latest/DeveloperGuide/routing-to-cloudfront-distribution.html" }
+    ]
+  },
+  alternatives: [
+    {
+      name: "Amplify Hosting（Git連携で全部おまかせ）",
+      when: "設定の手数を最小にしたい・Gitにpushしたら自動デプロイまでしてほしい場合",
+      diagram: {
+        cols: 4, rows: 2,
+        groups: [
+          { type: "aws-cloud", label: "AWS Cloud", from: [2, 0], to: [3, 1] }
+        ],
+        nodes: [
+          { id: "dev", icon: "resources/client", label: "開発者\nGit push", col: 0, row: 0 },
+          { id: "amplify", icon: "services/amplify", label: "Amplify\nHosting", col: 2, row: 0 },
+          { id: "users", icon: "resources/users", label: "ユーザー", col: 0, row: 1 },
+          { id: "cf2", icon: "services/cloudfront", label: "CDN配信\n(内蔵)", col: 3, row: 1 }
+        ],
+        edges: [
+          { from: "dev", to: "amplify", label: "自動ビルド" },
+          { from: "users", to: "cf2", label: "HTTPS" },
+          { from: "amplify", to: "cf2", noArrow: true, dashed: true }
+        ]
+      },
+      pros: [
+        "GitHub連携でpush→ビルド→デプロイまで全自動。CDN・HTTPSも内蔵",
+        "プレビュー環境（ブランチごとのURL）が自動でできる"
+      ],
+      cons: [
+        "S3+CloudFrontよりカスタマイズの自由度が低い",
+        "内部の挙動がブラックボックス寄りで、細かいキャッシュ制御はしにくい"
+      ],
+      references: [
+        { title: "AWS Amplify Hostingとは", url: "https://docs.aws.amazon.com/ja_jp/amplify/latest/userguide/welcome.html", note: "Amplify公式ユーザーガイド" }
+      ]
+    },
+    {
+      name: "EC2 + WordPress（動的CMSが必要なとき）",
+      when: "非エンジニアが管理画面から頻繁に更新したい・既存のWordPress資産がある場合",
+      diagram: {
+        cols: 6, rows: 2,
+        groups: [
+          { type: "aws-cloud", label: "AWS Cloud", from: [1, 0], to: [5, 1] },
+          { type: "vpc", label: "VPC", from: [2, 0], to: [5, 0], depth: 1 },
+          { type: "public-subnet", label: "パブリックサブネット", from: [3, 0], to: [3, 0], depth: 2 },
+          { type: "private-subnet", label: "プライベートサブネット", from: [5, 0], to: [5, 0], depth: 2 }
+        ],
+        nodes: [
+          { id: "users", icon: "resources/users", label: "ユーザー", col: 0, row: 0 },
+          { id: "cf", icon: "services/cloudfront", label: "CloudFront", col: 1, row: 0 },
+          { id: "igw", icon: "resources/internet-gateway", label: "インターネット\nゲートウェイ", col: 2, row: 0 },
+          { id: "ec2", icon: "services/ec2", label: "EC2\nWordPress", col: 3, row: 0 },
+          { id: "rds", icon: "services/rds", label: "RDS\nMySQL", col: 5, row: 0 },
+          { id: "s3m", icon: "services/s3", label: "S3\n画像等", col: 3, row: 1 }
+        ],
+        edges: [
+          { from: "users", to: "cf", label: "HTTPS" },
+          { from: "cf", to: "igw" },
+          { from: "igw", to: "ec2" },
+          { from: "ec2", to: "rds", label: "SQL" },
+          { from: "ec2", to: "s3m", label: "メディア保存" }
+        ]
+      },
+      flow: [
+        "ユーザーのリクエストはCloudFrontを経由し、VPCの玄関であるインターネットゲートウェイ（IGW）を通ってパブリックサブネットのEC2に届く",
+        "EC2はプライベートサブネットのRDSにSQLで接続する。RDSは外から直接届かない場所に置くのが定石",
+        "アップロード画像はVPCの外にあるS3へ保存する（S3はサブネットの中には置けない）"
+      ],
+      pros: [
+        "管理画面から誰でも更新できる（CMSの本領）",
+        "WordPressの豊富なテーマ・プラグイン資産が使える"
+      ],
+      cons: [
+        "EC2とRDSは常時起動＝アイドル時も月数千円〜の固定費がかかる",
+        "OS・WordPress本体・プラグインのアップデート運用が必要（セキュリティ責任が重い）",
+        "アクセス集中には自力でスケーリング設計が必要"
+      ],
+      references: [
+        { title: "Best Practices for WordPress on AWS", url: "https://docs.aws.amazon.com/ja_jp/whitepapers/latest/best-practices-wordpress/welcome.html", note: "AWS公式ホワイトペーパー" },
+        { title: "インターネットゲートウェイを使用してインターネットに接続する", url: "https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/VPC_Internet_Gateway.html", note: "VPC公式ユーザーガイド" },
+        { title: "Amazon RDSとは", url: "https://docs.aws.amazon.com/ja_jp/AmazonRDS/latest/UserGuide/Welcome.html" }
+      ]
+    }
+  ],
+  cost: "<p>推奨構成の場合：<strong>月数十円〜数百円</strong>が目安（S3保存料＋CloudFront転送量。小規模サイトなら無料枠内に収まることも多い）。EC2+WordPress案は<strong>月3,000円〜1万円程度</strong>（t3.small相当＋RDS最小構成）からで、アイドル時も課金され続ける点が大きな違い。</p>",
+  summary: "<p>「静的サイトはS3+CloudFront」はAWSの最頻出パターンです。<strong>サーバーを持たない構成はコスト・運用・耐障害性の全部で有利</strong>で、動的処理が必要になったら次のケースで学ぶAPI構成を後付けすれば拡張できます。逆に「更新担当が非エンジニア」という人の要件が入った瞬間にCMS（WordPress）案が浮上する、という判断の分かれ方も覚えておきましょう。</p>"
+});

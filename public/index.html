@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS Architecture Patterns - ケースで学ぶAWSアーキテクチャ</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <header id="sidebar-header">
+        <h1>AWS Architecture Patterns</h1>
+        <div id="progress-wrap">
+          <div id="progress-bar"><div id="progress-fill"></div></div>
+          <span id="progress-label">0 / 0</span>
+        </div>
+      </header>
+      <nav id="toc" aria-label="ケース一覧"></nav>
+      <footer id="sidebar-footer">
+        <span>図はAWS公式Architecture Iconsで作成</span>
+      </footer>
+    </aside>
+    <main id="main">
+      <div id="case-view" hidden></div>
+      <div id="welcome" class="placeholder">
+        <h2>ようこそ</h2>
+        <p>左のケース一覧から始めましょう。</p>
+      </div>
+    </main>
+  </div>
+  <script src="app-register.js"></script>
+  <script src="content/intro.js"></script>
+  <script src="content/case01.js"></script>
+  <script src="diagram.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

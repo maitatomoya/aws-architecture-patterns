@@ -6,6 +6,8 @@
 設計の工夫点→メリット・デメリット→代替パターン→公式ドキュメント、の流れで
 「アーキテクチャを選ぶ力」を鍛える。
 
+公開URL：https://aws-architecture-patterns.pages.dev
+
 ## 特徴
 
 - 構成図はAWS公式のArchitecture Icons（2026年7月31日版）を使用し、枠線の色・線種も公式規定に準拠

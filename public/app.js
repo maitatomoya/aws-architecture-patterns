@@ -31,6 +31,7 @@
   var elWelcome = $("welcome");
   var current = null;
   var introShown = false;
+  var resourcesShown = false;
 
   function doneCount() {
     return cases.filter(function (c) { return state.done[c.id]; }).length;
@@ -76,6 +77,13 @@
       details.appendChild(ul);
       elToc.appendChild(details);
     });
+    if (window.AWS_RESOURCES) {
+      var r = document.createElement("a");
+      r.href = "#resources";
+      r.className = "toc-intro toc-resources" + (resourcesShown ? " active" : "");
+      r.textContent = window.AWS_RESOURCES.tocTitle || "参考資料リスト";
+      elToc.appendChild(r);
+    }
   }
 
   function h(html) { return html || ""; }
@@ -144,6 +152,7 @@
     if (!c) return;
     current = c;
     introShown = false;
+    resourcesShown = false;
     state.lastCase = id;
     saveState();
     elWelcome.hidden = true;
@@ -193,6 +202,7 @@
     var intro = window.AWS_INTRO;
     if (!intro) return;
     introShown = true;
+    resourcesShown = false;
     current = null;
     elView.hidden = true;
     elWelcome.hidden = false;
@@ -211,10 +221,29 @@
     $("main").scrollTop = 0;
   }
 
+  function showResources() {
+    var res = window.AWS_RESOURCES;
+    if (!res) return;
+    resourcesShown = true;
+    introShown = false;
+    current = null;
+    elView.hidden = true;
+    elWelcome.hidden = false;
+    elWelcome.innerHTML = "";
+    var page = document.createElement("div");
+    page.className = "intro-page";
+    page.innerHTML = res.content;
+    elWelcome.appendChild(page);
+    renderToc();
+    window.scrollTo(0, 0);
+    $("main").scrollTop = 0;
+  }
+
   window.addEventListener("hashchange", function () {
     var m = location.hash.match(/^#case-(\d+)$/);
     if (m) showCase(Number(m[1]));
     else if (location.hash === "#intro") showIntro();
+    else if (location.hash === "#resources") showResources();
   });
 
   if (cases.length === 0) {

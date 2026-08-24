@@ -400,6 +400,14 @@ button:disabled { opacity: 0.6; cursor: wait; }
   color: #fff;
 }
 
+/* 参考資料リスト（ケース一覧の末尾に置く付録リンク） */
+.toc-resources {
+  border-bottom: none;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+.resources-checked { color: var(--text-sub); font-size: 12.5px; }
+
 .intro-page {
   max-width: 860px;
   margin: 0 auto;

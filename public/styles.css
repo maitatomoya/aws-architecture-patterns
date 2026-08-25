@@ -52,7 +52,8 @@ body {
 #sidebar-header h1 {
   margin: 0 0 10px;
   font-size: 20px;
-  color: var(--rust-orange);
+  /* 明るいオレンジは薄い背景とのコントラスト不足（2.74:1）のため暗い方を使う */
+  color: var(--rust-orange-dark);
 }
 
 #progress-wrap {
@@ -80,6 +81,39 @@ body {
   font-size: 12px;
   color: var(--text-sub);
   white-space: nowrap;
+}
+
+/* ケース検索欄 */
+#toc-search-wrap {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+#toc-search {
+  width: 100%;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+#toc-search::placeholder { color: var(--text-sub); }
+
+/* フォーカスリングは消さず、サイト配色に合わせて明示する */
+#toc-search:focus {
+  outline: 2px solid var(--rust-orange-dark);
+  outline-offset: 1px;
+  border-color: var(--rust-orange-dark);
+}
+
+.toc-empty {
+  padding: 10px 16px;
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-sub);
 }
 
 #toc {
@@ -120,7 +154,8 @@ body {
 .toc-step.done { color: var(--ok); }
 .toc-step.done::before { content: "✓ "; }
 .toc-step.active {
-  background: var(--rust-orange);
+  /* 白文字とのコントラスト確保（WCAG AA）のため暗いオレンジにする */
+  background: var(--rust-orange-dark);
   color: #fff;
 }
 
@@ -242,13 +277,14 @@ button {
 button:hover { background: var(--bg-side); }
 
 button.primary {
-  background: var(--rust-orange);
-  border-color: var(--rust-orange);
+  /* 白文字とのコントラスト確保（WCAG AA）のため暗いオレンジにする */
+  background: var(--rust-orange-dark);
+  border-color: var(--rust-orange-dark);
   color: #fff;
   font-weight: 600;
 }
 
-button.primary:hover { background: var(--rust-orange-dark); }
+button.primary:hover { background: #8f4207; border-color: #8f4207; }
 button:disabled { opacity: 0.6; cursor: wait; }
 
 #editor-host .CodeMirror {
@@ -396,7 +432,8 @@ button:disabled { opacity: 0.6; cursor: wait; }
 
 .toc-intro:hover { background: #eee8e2; }
 .toc-intro.active {
-  background: var(--rust-orange);
+  /* 白文字とのコントラスト確保（WCAG AA）のため暗いオレンジにする */
+  background: var(--rust-orange-dark);
   color: #fff;
 }
 

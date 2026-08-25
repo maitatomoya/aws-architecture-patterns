@@ -49,7 +49,7 @@ registerCase({
       { icon: "services/lambda", name: "AWS Lambda", role: "予約登録・リマインド送信のロジックを実行。リクエストがある時だけ動き、待機コストがない" },
       { icon: "services/dynamodb", name: "Amazon DynamoDB", role: "予約データの保存先。条件付き書き込みでダブルブッキングを防げるNoSQLデータベース" },
       { icon: "services/eventbridge", name: "Amazon EventBridge Scheduler", role: "「この日時に1回だけ実行」を予約ごとに登録できるスケジューラ。リマインドの心臓部" },
-      { icon: "services/ses", name: "Amazon SES", role: "リマインドメールの送信。1通あたり約0.01円と安価" }
+      { icon: "services/ses", name: "Amazon SES", role: "リマインドメールの送信。1通あたり約0.015円と安価" }
     ],
     points: [
       "ダブルブッキング対策はDynamoDBの条件付き書き込み（ConditionExpression）で実現する。「その枠がまだ空いている場合のみ書き込む」をDB側が保証するため、同時アクセスでも二重予約が起きない",

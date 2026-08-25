@@ -133,7 +133,7 @@ registerCase({
         "VPC・NATゲートウェイなどネットワークの管理対象が増える",
         "少量の変換ではマネージドとの価格差がほぼ出ず、手間だけが増える"
       ],
-      cost: "<strong>月数千円〜（変換量に比例）</strong>。スポットのc系インスタンスなら1時間数十円でHD数本を変換でき、大量変換時の単価はMediaConvertより下げられる。ただしNATゲートウェイ（月5,000円前後）や運用工数という見えにくいコストが乗る。",
+      cost: "<strong>月数千円〜（変換量に比例）</strong>。スポットのc系インスタンスなら1時間数十円でHD数本を変換でき、大量変換時の単価はMediaConvertより下げられる。ただしNATゲートウェイ（月約45USD、約6,800円）や運用工数という見えにくいコストが乗る。",
       references: [
         { title: "AWS Batchとは", url: "https://docs.aws.amazon.com/ja_jp/batch/latest/userguide/what-is-batch.html" },
         { title: "Amazon EC2とは", url: "https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/concepts.html" },

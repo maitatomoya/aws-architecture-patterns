@@ -116,7 +116,7 @@ registerCase({
       points: [
         "Schedulerはそのままに実行部分だけを差し替えるのがポイント。「15分を超えたらLambdaをFargateタスクに変える」は定番の移行パターン",
         "バッチコンテナはプライベートサブネットに置き、インターネットからの入口を作らない。図のインターネットゲートウェイは外向き通信（NAT経由）の出口として描かれている",
-        "NATゲートウェイは月約5,000円の固定費がかかる。通信先がS3・ECRだけならVPCエンドポイントに置き換えるとNATなしで安く安全にできる",
+        "NATゲートウェイは月約45USD（約6,800円）の固定費がかかる。通信先がS3・ECRだけならVPCエンドポイントに置き換えるとNATなしで安く安全にできる",
         "タスク起動に1〜2分かかるため、深夜バッチでは問題にならないが、分単位の高頻度実行には向かない"
       ],
       pros: [
@@ -129,7 +129,7 @@ registerCase({
         "NATゲートウェイを使う場合は固定費が発生する",
         "コンテナイメージのビルド・管理という運用が増える"
       ],
-      cost: "<strong>実行時間分のみで月数十円〜数百円</strong>（1vCPU/2GBを毎日30分で約110円/月。NATゲートウェイを置く場合は約5,000円/月が加算されるため、VPCエンドポイント代替を検討）。",
+      cost: "<strong>実行時間分のみで月数十円〜数百円</strong>（1vCPU/2GBを毎日30分で約110円/月。NATゲートウェイを置く場合は月約45USD（約6,800円）が加算されるため、VPCエンドポイント代替を検討）。",
       references: [
         { title: "ECSのスケジュールされたタスク", url: "https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/scheduled_tasks.html", note: "SchedulerからECSタスクを定期起動する公式手順" },
         { title: "AWS Fargateとは", url: "https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/AWS_Fargate.html" },
@@ -191,7 +191,7 @@ registerCase({
         "コンテナ化・ジョブ定義・VPC設計が前提になる",
         "起動オーバーヘッドがあるため、数秒で終わる軽い処理の定期実行には不向き"
       ],
-      cost: "<strong>実行時間分のみで月数百円〜数千円</strong>（例：4vCPU/8GBで毎晩30分のジョブ群なら約450円/月、スポットなら更に安い。NATゲートウェイ利用時は約5,000円/月が加算）。",
+      cost: "<strong>実行時間分のみで月数百円〜数千円</strong>（例：4vCPU/8GBで毎晩30分のジョブ群なら約450円/月、スポットなら更に安い。NATゲートウェイ利用時は月約45USD（約6,800円）が加算）。",
       references: [
         { title: "AWS Batchとは", url: "https://docs.aws.amazon.com/ja_jp/batch/latest/userguide/what-is-batch.html", note: "Batch公式ユーザーガイド" },
         { title: "Batchのジョブの依存関係", url: "https://docs.aws.amazon.com/ja_jp/batch/latest/userguide/job_dependencies.html", note: "dependsOnによる順序制御の公式解説" },
@@ -199,6 +199,6 @@ registerCase({
       ]
     }
   ],
-  cost: "<p>推奨構成（Scheduler+Lambda）は<strong>月0円〜数百円</strong>でほぼ無料。Fargateスケジュールタスク案は実行時間分のみで<strong>月数十円〜数百円</strong>、Batch案も<strong>月数百円〜数千円</strong>と安いが、どちらもNATゲートウェイを置くと<strong>約5,000円/月</strong>の固定費が乗る点に注意（VPCエンドポイントで回避可能）。</p>",
+  cost: "<p>推奨構成（Scheduler+Lambda）は<strong>月0円〜数百円</strong>でほぼ無料。Fargateスケジュールタスク案は実行時間分のみで<strong>月数十円〜数百円</strong>、Batch案も<strong>月数百円〜数千円</strong>と安いが、どちらもNATゲートウェイを置くと<strong>月約45USD（約6,800円）</strong>の固定費が乗る点に注意（VPCエンドポイントで回避可能）。</p>",
   summary: "<p>定期バッチは「EC2にcron」から卒業する題材として最適です。核になる考え方は2つ。1つ目は<strong>スケジューラと実行環境の分離</strong>。起点は常にEventBridge Schedulerに置き、実行側だけを処理の重さで選ぶ（15分以内ならLambda、超えるならFargateタスク、依存ジョブ群ならBatch）。2つ目は<strong>失敗検知を処理の外側に置く</strong>こと。バッチ自身に通知させるのではなく、CloudWatchアラーム+SNSで監視する構図は、どの実行環境でも変わらない共通パターンです。この2つを押さえると、バッチ基盤の構成は要件から機械的に導けるようになります。</p>"
 });

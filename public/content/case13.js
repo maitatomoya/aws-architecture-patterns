@@ -12,7 +12,7 @@ registerCase({
     "時間帯・イベントによる急激な同時接続数の増減に耐えたい"
   ],
   main: {
-    name: "Amazon GameLift + DynamoDB + ElastiCache",
+    name: "Amazon GameLift Servers + DynamoDB + ElastiCache",
     diagram: {
       cols: 5, rows: 2,
       groups: [
@@ -24,7 +24,7 @@ registerCase({
         { id: "client", icon: "resources/mobile-client", label: "ゲーム\nクライアント", col: 0, row: 1 },
         { id: "apigw", icon: "services/api-gateway", label: "API Gateway\nバックエンドAPI", col: 1, row: 0 },
         { id: "fn", icon: "services/lambda", label: "Lambda\nマッチメイキング", col: 2, row: 0 },
-        { id: "gamelift", icon: "services/gamelift", label: "GameLift\nゲームサーバー群", col: 2, row: 1 },
+        { id: "gamelift", icon: "services/gamelift", label: "GameLift Servers\nゲームサーバー群", col: 2, row: 1 },
         { id: "ddb", icon: "services/dynamodb", label: "DynamoDB\n戦績・アイテム", col: 4, row: 0 },
         { id: "cache", icon: "services/elasticache", label: "ElastiCache\nランキング", col: 4, row: 1 }
       ],
@@ -38,14 +38,14 @@ registerCase({
       ]
     },
     flow: [
-      "クライアントがAPI Gateway経由のバックエンドAPIに「対戦したい」とリクエストし、LambdaがGameLiftのマッチメイキング機能（FlexMatch）に問い合わせる",
-      "GameLiftが実力の近いプレイヤーを組み合わせ、空いているゲームサーバー（ゲームセッション）を割り当ててIPアドレスとポートを返す",
+      "クライアントがAPI Gateway経由のバックエンドAPIに「対戦したい」とリクエストし、LambdaがGameLift Serversのマッチメイキング機能（FlexMatch）に問い合わせる",
+      "GameLift Serversが実力の近いプレイヤーを組み合わせ、空いているゲームサーバー（ゲームセッション）を割り当ててIPアドレスとポートを返す",
       "クライアントは以降そのゲームサーバーへ直接UDPで接続し、対戦中の位置・操作情報を低遅延でやり取りする（HTTPを経由しないのがポイント）",
       "対戦結果が出ると、ゲームサーバーがDynamoDBへ戦績・アイテムを永続保存する",
       "同時にElastiCacheのソート済みセット（スコア順に並ぶデータ構造）を更新し、ランキングを常に最新の状態に保つ"
     ],
     services: [
-      { icon: "services/gamelift", name: "Amazon GameLift", role: "対戦用ゲームサーバーのホスティング専用サービス。サーバーの起動・配置・スケールとマッチメイキングを担う" },
+      { icon: "services/gamelift", name: "Amazon GameLift Servers（旧GameLift）", role: "対戦用ゲームサーバーのホスティング専用サービス。サーバーの起動・配置・スケールとマッチメイキングを担う。2025年に旧称GameLiftから改称された" },
       { icon: "services/dynamodb", name: "Amazon DynamoDB", role: "戦績・所持アイテムの永続保存。1桁ミリ秒の応答で、プレイヤー数が跳ねても自動スケールする" },
       { icon: "services/elasticache", name: "Amazon ElastiCache", role: "インメモリ（メモリ上で動く超高速データストア）のランキング集計。ソート済みセットで上位表示が一瞬で取れる" },
       { icon: "services/api-gateway", name: "Amazon API Gateway", role: "マッチング要求・戦績取得などゲーム外のAPIの入口" },
@@ -54,23 +54,23 @@ registerCase({
     points: [
       "対戦中の通信をHTTPのAPIに通さず、割り当てられたゲームサーバーへ直接UDP接続させるのが低遅延の要。APIは「対戦の前後」だけを担当する役割分担にする",
       "ランキングは「書き込みが激しく、常にスコア順で読む」データなのでDynamoDBよりElastiCacheが適任。永続データはDynamoDB、瞬間的な集計はElastiCacheという使い分けが定石",
-      "GameLiftのゲームサーバー群はAWS管理のVPCで動くため、自分のVPCに描くのはElastiCacheだけでよい。接続はVPCピアリング（VPC同士を私設接続する仕組み）などで確保する。インターネットゲートウェイが無いのは、プレイヤーからの通信がGameLiftの公開エンドポイントに直接届き、自前VPCへのインターネット入口が不要なため",
-      "イベント時のスパイクにはGameLiftのフリート（サーバー群）の自動スケーリングで対応し、待機サーバー数を需要予測に合わせて調整してコストを絞る"
+      "GameLift Serversのゲームサーバー群はAWS管理のVPCで動くため、自分のVPCに描くのはElastiCacheだけでよい。接続はVPCピアリング（VPC同士を私設接続する仕組み）などで確保する。インターネットゲートウェイが無いのは、プレイヤーからの通信がGameLift Serversの公開エンドポイントに直接届き、自前VPCへのインターネット入口が不要なため",
+      "イベント時のスパイクにはGameLift Serversのフリート（サーバー群）の自動スケーリングで対応し、待機サーバー数を需要予測に合わせて調整してコストを絞る"
     ],
     pros: [
       "ゲームサーバーの配置・スケール・マッチメイキングという難所を専用サービスに任せられる",
-      "スポットインスタンス活用（GameLiftの機能）でサーバー費用を大きく削減できる",
+      "スポットインスタンス活用（GameLift Serversの機能）でサーバー費用を大きく削減できる",
       "永続化とランキングを適材適所のデータストアに分けており、プレイヤー急増にも耐えやすい"
     ],
     cons: [
-      "GameLiftのSDKをゲームサーバーに組み込む実装が必要で、学習コストがある",
+      "GameLift ServersのSDKをゲームサーバーに組み込む実装が必要で、学習コストがある",
       "ゲームサーバーは常時ある程度待機させるため、完全な従量課金にはならない",
       "ElastiCacheはVPC内のサービスであり、ネットワーク設計（ピアリング等）の知識が必要になる"
     ],
     cost: "<strong>月1.5万円〜数十万円</strong>（最小フリート1台＋ElastiCache最小ノード＋DynamoDB少量で月1.5万円前後。同時接続数に比例してゲームサーバー台数分が増える。スポット利用で圧縮可能）。",
     references: [
-      { title: "Amazon GameLiftとは", url: "https://docs.aws.amazon.com/ja_jp/gamelift/latest/developerguide/gamelift-intro.html", note: "GameLift公式開発者ガイド" },
-      { title: "GameLift FlexMatchとは", url: "https://docs.aws.amazon.com/ja_jp/gamelift/latest/flexmatchguide/match-intro.html", note: "マッチメイキング機能の公式ガイド" },
+      { title: "Amazon GameLift Serversとは", url: "https://docs.aws.amazon.com/ja_jp/gameliftservers/latest/developerguide/gamelift-intro.html", note: "GameLift Servers公式開発者ガイド" },
+      { title: "Amazon GameLift Servers FlexMatchとは", url: "https://docs.aws.amazon.com/ja_jp/gameliftservers/latest/flexmatchguide/match-intro.html", note: "マッチメイキング機能の公式ガイド" },
       { title: "Amazon ElastiCacheとは", url: "https://docs.aws.amazon.com/ja_jp/AmazonElastiCache/latest/dg/WhatIs.html" },
       { title: "Amazon DynamoDBとは", url: "https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/Introduction.html" }
     ]
@@ -177,13 +177,13 @@ registerCase({
       ],
       points: [
         "ALBではなくNLBを選ぶのは、ゲームで多用するUDPを振り分けられてレイテンシも小さいから。L7機能（パスルーティング等）が不要ならL4で十分",
-        "Kubernetesのゲームサーバー運用にはAgonesなどのオープンソース基盤を載せるのが実務の定番。GameLiftが担う「セッション管理」を自前で作ることになる",
+        "Kubernetesのゲームサーバー運用にはAgonesなどのオープンソース基盤を載せるのが実務の定番。GameLift Serversが担う「セッション管理」を自前で作ることになる",
         "ゲームサーバーPodはプライベートサブネットに置き、外からの入口はNLB経由に限定する。イメージ取得などの外向き通信はNATゲートウェイに集約する",
         "EKSはコントロールプレーン費用が常にかかるため、小規模タイトルではオーバースペックになりやすい。専任の運用体制が持てるかで判断する"
       ],
       pros: [
         "プロトコル・サーバー構成・スケール戦略まで完全に自由に設計できる",
-        "GameLift非対応の特殊要件（独自マッチング・専用ハードウェア相当の構成など）にも対応できる",
+        "GameLift Servers非対応の特殊要件（独自マッチング・専用ハードウェア相当の構成など）にも対応できる",
         "Kubernetesの資産（監視・デプロイの仕組み）を他システムと共通化できる"
       ],
       cons: [
@@ -191,7 +191,7 @@ registerCase({
         "EKSコントロールプレーン＋ノード＋NLB＋NATと固定費の部品が多い",
         "Kubernetesの運用スキルを持つメンバーが必須"
       ],
-      cost: "<strong>月3万円〜</strong>（EKSコントロールプレーン約1.1万円＋最小ノード群＋NLB＋NATゲートウェイ約5,000円＋ElastiCache。規模に応じてノード数分が増える）。",
+      cost: "<strong>月3万円〜</strong>（EKSコントロールプレーン約1.1万円＋最小ノード群＋NLB＋NATゲートウェイ約6,800円（約45USD）＋ElastiCache。規模に応じてノード数分が増える）。",
       references: [
         { title: "Amazon EKSとは", url: "https://docs.aws.amazon.com/ja_jp/eks/latest/userguide/what-is-eks.html", note: "EKS公式ユーザーガイド" },
         { title: "Network Load Balancerとは", url: "https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/network/introduction.html", note: "NLB公式ガイド" },
@@ -199,6 +199,6 @@ registerCase({
       ]
     }
   ],
-  cost: "<p>推奨構成（GameLift）は<strong>月1.5万円〜</strong>で同時接続数に比例して増加（スポット利用で圧縮可）。WebSocket+Lambda案はターン制に限られる代わりに<strong>月数百円〜数千円</strong>と桁違いに安い。EKS自前運用案は<strong>月3万円〜</strong>の固定費に加えて運用人件費が実質最大のコストになる。</p>",
-  summary: "<p>ゲームバックエンドの設計は<strong>「対戦中のリアルタイム通信」と「対戦前後のAPI」を分離する</strong>のが出発点です。前者は低遅延が命なのでゲームサーバーへの直接接続（UDP）、後者は普通のサーバーレスAPIで十分。リアルタイム性の要求水準がそのまま構成選定になり、アクション級ならGameLift、ターン制ならWebSocket+Lambda、特殊要件と運用体制があるならEKS自前、と分かれます。またデータ層では<strong>永続データはDynamoDB・瞬間的な共有状態やランキングはElastiCache</strong>という使い分けが、ゲームに限らず高トラフィックシステム全般で使える定石です。</p>"
+  cost: "<p>推奨構成（GameLift Servers）は<strong>月1.5万円〜</strong>で同時接続数に比例して増加（スポット利用で圧縮可）。WebSocket+Lambda案はターン制に限られる代わりに<strong>月数百円〜数千円</strong>と桁違いに安い。EKS自前運用案は<strong>月3万円〜</strong>の固定費に加えて運用人件費が実質最大のコストになる。</p>",
+  summary: "<p>ゲームバックエンドの設計は<strong>「対戦中のリアルタイム通信」と「対戦前後のAPI」を分離する</strong>のが出発点です。前者は低遅延が命なのでゲームサーバーへの直接接続（UDP）、後者は普通のサーバーレスAPIで十分。リアルタイム性の要求水準がそのまま構成選定になり、アクション級ならGameLift Servers、ターン制ならWebSocket+Lambda、特殊要件と運用体制があるならEKS自前、と分かれます。またデータ層では<strong>永続データはDynamoDB・瞬間的な共有状態やランキングはElastiCache</strong>という使い分けが、ゲームに限らず高トラフィックシステム全般で使える定石です。</p>"
 });

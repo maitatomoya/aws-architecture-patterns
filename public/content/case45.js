@@ -68,7 +68,7 @@ registerCase({
       "FargateはEC2起動タイプよりvCPU単価が割高（管理コスト削減とのトレードオフ）",
       "Kubernetesエコシステムの豊富なツール群（Helm等）は使えない"
     ],
-    cost: "<strong>月8,000円〜2万円程度</strong>（0.25vCPU/0.5GBのタスク2個常時起動+ALBの場合）。Fargateは1vCPUあたり月約29USD+メモリ課金で、小型タスク2個で約20USD、ALBが約20USD〜。タスク数を増やせば比例して増える。夜間にdev環境のタスク数を0にする等の節約が効きやすい。",
+    cost: "<strong>月8,000円〜2万円程度</strong>（0.25vCPU/0.5GBのタスク2個常時起動+ALBの場合）。Fargateは東京リージョンで1vCPUあたり月約37USD+メモリ課金で、小型タスク2個で約23USD、ALBが約20USD〜。タスク数を増やせば比例して増える。夜間にdev環境のタスク数を0にする等の節約が効きやすい。",
     references: [
       { title: "Amazon ECSとは", url: "https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/Welcome.html" },
       { title: "AWS Fargate", url: "https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/AWS_Fargate.html", note: "サーバーレスなコンテナ実行の公式解説" },
@@ -120,7 +120,7 @@ registerCase({
       points: [
         "EKSの価値は「Kubernetesという業界標準API」にある。Helmチャートなどの膨大なエコシステム資産と、他クラウド・オンプレでも通用する運用知識が手に入る",
         "引き換えにクラスターのバージョンアップ（年数回）、アドオン管理、マニフェスト管理などECSにはない継続的な運用作業が発生する。専任がいないチームには重い",
-        "「将来のためにEKS」は少人数チームの典型的な過剰投資。1〜数個のサービスならECSで十分で、チームと サービス数が育ってから移行しても遅くない",
+        "「将来のためにEKS」は少人数チームの典型的な過剰投資。1〜数個のサービスならECSで十分で、チームとサービス数が育ってから移行しても遅くない",
         "コントロールプレーンだけで月約73USDかかるため、小規模ではコスト面でも不利になる"
       ],
       pros: [

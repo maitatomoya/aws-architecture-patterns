@@ -66,7 +66,8 @@ registerCase({
     cost: "<strong>月5,000円〜2万円程度</strong>（車両100台・30秒間隔・営業12時間のみ送信、10件バッチ送信、地図タイル取得数十万回の想定。位置書き込み・タイル取得・ジオフェンス評価の従量課金）。",
     references: [
       { title: "Amazon Location Serviceとは", url: "https://docs.aws.amazon.com/ja_jp/location/latest/developerguide/what-is.html", note: "Location Service公式デベロッパーガイド" },
-      { title: "ジオフェンスとトラッカーの概念", url: "https://docs.aws.amazon.com/ja_jp/location/latest/developerguide/geofence-tracker-concepts.html", note: "トラッカー・ジオフェンス連動の解説" },
+      { title: "Amazon Location Serviceのトラッカー", url: "https://docs.aws.amazon.com/ja_jp/location/latest/developerguide/trackers.html", note: "トラッカー（位置追跡）の公式解説" },
+      { title: "Amazon Location Serviceのジオフェンス", url: "https://docs.aws.amazon.com/ja_jp/location/latest/developerguide/geofences.html", note: "ジオフェンスとトラッカー連動の公式解説" },
       { title: "Amazon API Gatewayとは", url: "https://docs.aws.amazon.com/ja_jp/apigateway/latest/developerguide/welcome.html" },
       { title: "Amazon DynamoDBとは", url: "https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/Introduction.html" }
     ]
@@ -111,7 +112,7 @@ registerCase({
       points: [
         "1本のストリームに複数のコンシューマー（読み手）を付けられるのがKinesisの強み。リアルタイム判定と全量蓄積を1つの入口で両立できる",
         "シャード数＝処理能力。1シャードで秒間1MB・1,000レコードが目安なので、台数×頻度から逆算して増減する",
-        "地図表示やジオフェンスが必要なら、main案のLocation Serviceを地図・通知係として併用できる（排他ではない）"
+        "地図表示やジオフェンスが必要なら、推奨構成のLocation Serviceを地図・通知係として併用できる（排他ではない）"
       ],
       pros: [
         "数千台×秒間隔の高頻度でも受け止められる",
@@ -121,7 +122,7 @@ registerCase({
       cons: [
         "地図表示・ジオフェンスは含まれないため別途用意する必要がある",
         "シャードの管理・スケーリングの知識が必要",
-        "車両100台・30秒間隔程度の規模には過剰装備でmain案より複雑"
+        "車両100台・30秒間隔程度の規模には過剰装備で推奨構成より複雑"
       ],
       cost: "<strong>月3,000円〜1万円程度</strong>（1〜2シャード約2,000〜4,000円＋PUT課金＋Lambda・DynamoDB・S3で数千円。台数が増えたらシャード追加で階段状に増える）。",
       references: [
@@ -159,7 +160,7 @@ registerCase({
         "地図タイル（地図画像をズームレベルごとに細かく分割したもの）は事前生成してS3に置き、CloudFront経由でキャッシュ配信する",
         "未生成のズームレベルや動的スタイルの要求は、CloudFrontからVPC内のEC2タイルサーバーへ転送してオンデマンド描画する",
         "EC2が生成したタイルはS3へ保存し、次回以降は静的配信に切り替えてEC2に負荷をかけない",
-        "車両位置の収集・照会APIはmain案と同じくAPI Gateway＋Lambda＋DynamoDBを併用する（図では省略）"
+        "車両位置の収集・照会APIは推奨構成と同じくAPI Gateway＋Lambda＋DynamoDBを併用する（図では省略）"
       ],
       services: [
         { icon: "services/cloudfront", name: "Amazon CloudFront", role: "タイルのCDN配信。キャッシュヒットさせてEC2とS3の負荷・費用を抑える" },
@@ -191,5 +192,5 @@ registerCase({
     }
   ],
   cost: "<p>推奨構成は<strong>月5,000円〜2万円程度</strong>（車両100台・30秒間隔・バッチ送信）。位置APIの従量課金が中心なので、送信頻度と台数がそのまま費用に効く。Kinesis案は<strong>月3,000円〜1万円程度</strong>から高頻度・大規模に伸ばせるが地図は別途。自前タイル案は<strong>月1万円〜3万円程度</strong>に加えて運用人件費が実質のコストになる。</p>",
-  summary: "<p>位置情報トラッキングは「<strong>地図・追跡・ジオフェンスをどこから調達するか</strong>」が設計の中心です。Location Serviceを使えば外部契約なしにAWS内で完結し、機微な位置データを外に出さずに済みます。頻度と台数が桁で増えるならKinesisのストリーム処理へ、地図表現が特殊ならタイル自前配信へ、という分岐ですが、後者2つはmain案との併用もできる点を覚えておくと選択の幅が広がります。</p>"
+  summary: "<p>位置情報トラッキングは「<strong>地図・追跡・ジオフェンスをどこから調達するか</strong>」が設計の中心です。Location Serviceを使えば外部契約なしにAWS内で完結し、機微な位置データを外に出さずに済みます。頻度と台数が桁で増えるならKinesisのストリーム処理へ、地図表現が特殊ならタイル自前配信へ、という分岐ですが、後者2つは推奨構成との併用もできる点を覚えておくと選択の幅が広がります。</p>"
 });

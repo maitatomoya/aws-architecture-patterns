@@ -67,7 +67,7 @@ registerCase({
     cost: "<strong>月数十円〜数百円</strong>。S3の保存料＋CloudFrontの転送量のみの従量課金で、CloudFrontは無料枠（転送1TB/月）が大きいため小規模サイトなら無料枠内に収まることも多い。",
     references: [
       { title: "Amazon S3を使用して静的ウェブサイトをホスティングする", url: "https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/WebsiteHosting.html", note: "S3公式ユーザーガイド" },
-      { title: "CloudFrontとS3で安全な静的ウェブサイトを始める", url: "https://docs.aws.amazon.com/ja_jp/AmazonCloudFront/latest/DeveloperGuide/getting-started-secure-static-website-cloudfront-s3.html", note: "この構成そのもののチュートリアル" },
+      { title: "Amazon CloudFrontによるウェブサイトの高速化", url: "https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/website-hosting-cloudfront-walkthrough.html", note: "S3+CloudFront配信のこの構成そのものの公式チュートリアル" },
       { title: "S3オリジンへのアクセスを制限する（OAC）", url: "https://docs.aws.amazon.com/ja_jp/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html", note: "「工夫点」で触れた直アクセス対策" },
       { title: "AWS Certificate Managerとは", url: "https://docs.aws.amazon.com/ja_jp/acm/latest/userguide/acm-overview.html" },
       { title: "Route 53でCloudFrontディストリビューションにルーティングする", url: "https://docs.aws.amazon.com/ja_jp/Route53/latest/DeveloperGuide/routing-to-cloudfront-distribution.html" }
@@ -182,5 +182,5 @@ registerCase({
     }
   ],
   cost: "<p>推奨構成の場合：<strong>月数十円〜数百円</strong>が目安（S3保存料＋CloudFront転送量。小規模サイトなら無料枠内に収まることも多い）。EC2+WordPress案は<strong>月3,000円〜1万円程度</strong>（t3.small相当＋RDS最小構成）からで、アイドル時も課金され続ける点が大きな違い。</p>",
-  summary: "<p>「静的サイトはS3+CloudFront」はAWSの最頻出パターンです。<strong>サーバーを持たない構成はコスト・運用・耐障害性の全部で有利</strong>で、動的処理が必要になったら次のケースで学ぶAPI構成を後付けすれば拡張できます。逆に「更新担当が非エンジニア」という人の要件が入った瞬間にCMS（WordPress）案が浮上する、という判断の分かれ方も覚えておきましょう。</p>"
+  summary: "<p>「静的サイトはS3+CloudFront」はAWSの最頻出パターンです。<strong>サーバーを持たない構成はコスト・運用・耐障害性の全部で有利</strong>で、動的処理が必要になったらケース14で学ぶAPI構成を後付けすれば拡張できます。逆に「更新担当が非エンジニア」という人の要件が入った瞬間にCMS（WordPress）案が浮上する、という判断の分かれ方も覚えておきましょう。</p>"
 });

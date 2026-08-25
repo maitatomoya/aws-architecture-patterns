@@ -30,7 +30,7 @@ registerCase({
         { from: "userB", to: "ws" },
         { from: "ws", to: "lambda", label: "ルート起動" },
         { from: "lambda", to: "ddb", label: "保存・宛先取得" },
-        { from: "lambda", to: "userB", label: "相手へ配信", dashed: true }
+        { from: "lambda", to: "userB", label: "API GW経由で配信", dashed: true }
       ]
     },
     flow: [
@@ -102,7 +102,7 @@ registerCase({
         { icon: "services/cognito", name: "Amazon Cognito", role: "利用者のサインイン・トークン発行。AppSyncの認可と自然に統合できる" }
       ],
       points: [
-        "main案で自作していた接続IDテーブルの管理・宛先解決・配信ループが丸ごと不要になる。リアルタイム部分の実装量は最少",
+        "推奨構成で自作していた接続IDテーブルの管理・宛先解決・配信ループが丸ごと不要になる。リアルタイム部分の実装量は最少",
         "Amplifyのクライアントライブラリを使うとsubscription購読が数行で書け、オフライン時の再同期もサポートされる",
         "チャット以外の画面データ取得もGraphQLに寄せられるなら価値が最大化する。逆にREST中心のチームにはGraphQLの学習コストが最大の障壁"
       ],
@@ -116,7 +116,7 @@ registerCase({
         "WebSocketの生の制御（独自プロトコル等）はできない",
         "リゾルバーのデバッグやログ調査には慣れが必要"
       ],
-      cost: "<strong>月数百円〜3,000円程度</strong>（月100万リクエスト＋リアルタイム配信100万件＋接続時間課金の想定。main案と同水準で、どちらも小規模なら月数百円に収まる）。",
+      cost: "<strong>月数百円〜3,000円程度</strong>（月100万リクエスト＋リアルタイム配信100万件＋接続時間課金の想定。推奨構成と同水準で、どちらも小規模なら月数百円に収まる）。",
       references: [
         { title: "AWS AppSyncとは", url: "https://docs.aws.amazon.com/ja_jp/appsync/latest/devguide/what-is-appsync.html", note: "AppSync公式デベロッパーガイド" },
         { title: "リアルタイムデータ（サブスクリプション）", url: "https://docs.aws.amazon.com/ja_jp/appsync/latest/devguide/aws-appsync-real-time-data.html", note: "リアルタイム配信の仕組み" },
@@ -164,7 +164,7 @@ registerCase({
         "複数サーバーでSocket.IOを動かすときはRedisアダプター（Pub/Sub同期）が定番。これがないと別サーバーの相手にメッセージが届かない",
         "スティッキーセッションを有効にしないとSocket.IOのハンドシェイクが失敗しやすい、という実運用の罠がある",
         "接続数の増減に対するタスクのオートスケーリングと、スケールイン時の接続の逃がし方まで設計する必要がある",
-        "main案・AppSync案と比べて「ここまで自前で組む理由があるか」を先に問うべき構成"
+        "推奨構成・AppSync案と比べて「ここまで自前で組む理由があるか」を先に問うべき構成"
       ],
       pros: [
         "プロトコル・接続管理・タイムアウトを完全に制御でき、API Gatewayの2時間切断のような制約がない",
@@ -185,5 +185,5 @@ registerCase({
     }
   ],
   cost: "<p>推奨構成とAppSync案はどちらも<strong>月数百円〜3,000円程度</strong>（同時接続1,000・月100万メッセージ）で、完全従量課金のため利用が少ない月はほぼゼロになる。自前Socket.IO案は<strong>月1万円〜3万円程度</strong>の固定費が接続ゼロでもかかる。費用よりも「実装量と制御の自由度」のトレードオフで選ぶのが実態に近い。</p>",
-  summary: "<p>リアルタイムチャットの難所は<strong>常時接続の維持とプッシュ配信</strong>で、これをどこまでAWSに任せるかで3案が分かれます。API Gateway WebSocketは「接続維持だけ任せて配信ロジックは自作」、AppSyncは「配信まで全部任せる」、ECS自前は「全部自分で制御する」という並びです。迷ったら実装量が少なく従量課金のマネージド案（main・alt1）から始め、プロトコル制御の要件が出てから自前案を検討する順番が安全です。</p>"
+  summary: "<p>リアルタイムチャットの難所は<strong>常時接続の維持とプッシュ配信</strong>で、これをどこまでAWSに任せるかで3案が分かれます。API Gateway WebSocketは「接続維持だけ任せて配信ロジックは自作」、AppSyncは「配信まで全部任せる」、ECS自前は「全部自分で制御する」という並びです。迷ったら実装量が少なく従量課金のマネージド2案（API Gateway WebSocketかAppSync）から始め、プロトコル制御の要件が出てから自前案を検討する順番が安全です。</p>"
 });

@@ -48,7 +48,7 @@ registerCase({
     points: [
       "MVPフェーズは「インフラの選択肢を学ぶ時間」より「機能を作る時間」が価値になる。ロードバランサーやAuto Scalingの設計を丸ごとApp Runnerに任せるのはそのための割り切り",
       "図にインターネットゲートウェイ（IGW）が無いのは省略ではない。ユーザーからの入口はAWSが運用するApp Runnerの公開エンドポイントで、自分のVPCをインターネットに公開していないため。VPCはDBを隠すためだけに使い、App RunnerからはVPCコネクタで内側に入る",
-      "DBをAurora Serverless v2にすると、アイドル時は最小容量（0.5 ACU）まで下がりコストを抑えつつ、デモでアクセスが跳ねても自動で追従する",
+      "DBをAurora Serverless v2にすると、負荷に応じて容量（ACU：Auroraの容量単位）が自動で増減し、デモでアクセスが跳ねても追従する。2024年11月からはアイドル時に0 ACUまで自動一時停止（auto-pause）でき（対応エンジンバージョンの条件あり）、停止中はコンピューティング課金がかからない（ストレージ課金は継続）",
       "アプリを最初からコンテナ（Dockerfile）で作っておくと、成長後にECSやEKSへ移行するときもイメージを作り直さずに済む。MVPの技術選定で将来の移行コストを下げる工夫"
     ],
     pros: [
@@ -62,12 +62,13 @@ registerCase({
       "WebSocketの長時間接続や重いバックグラウンド処理など、リクエスト応答型以外の処理は苦手",
       "常時一定以上のアクセスがある規模になると、ECS等の自前構成より割高になることがある"
     ],
-    cost: "<strong>月5,000円〜1.5万円程度</strong>（App Runner最小構成1vCPU/2GBを1インスタンス＋Aurora Serverless v2最小0.5ACU、東京リージョン・低トラフィックの場合）。App Runnerはアイドル時にCPU課金が下がる仕組みがあり、完全放置ならさらに下がる。",
+    cost: "<strong>月5,000円〜1.5万円程度</strong>（App Runner最小構成1vCPU/2GBを1インスタンス＋Aurora Serverless v2、東京リージョン・低トラフィックの場合）。App Runnerはアイドル時にCPU課金が下がる仕組みがあり、Auroraもアイドル時は0 ACUまで自動一時停止できるため、その間のDBのコンピューティング課金はゼロ（ストレージ課金は継続）。完全放置なら下限はさらに下がる。",
     references: [
       { title: "AWS App Runnerとは", url: "https://docs.aws.amazon.com/ja_jp/apprunner/latest/dg/what-is-apprunner.html", note: "App Runner公式デベロッパーガイド" },
       { title: "App RunnerからVPC内リソースへ接続する（VPCコネクタ）", url: "https://docs.aws.amazon.com/ja_jp/apprunner/latest/dg/network-vpc.html", note: "図の「VPCコネクタ」の公式解説" },
       { title: "Amazon ECRとは", url: "https://docs.aws.amazon.com/ja_jp/AmazonECR/latest/userguide/what-is-ecr.html" },
-      { title: "Aurora Serverless v2の使用", url: "https://docs.aws.amazon.com/ja_jp/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.html", note: "容量が自動増減するDBの仕組み" }
+      { title: "Aurora Serverless v2の使用", url: "https://docs.aws.amazon.com/ja_jp/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.html", note: "容量が自動増減するDBの仕組み" },
+      { title: "Aurora Serverlessの自動一時停止と再開によるゼロACUへのスケーリング", url: "https://docs.aws.amazon.com/ja_jp/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2-auto-pause.html", note: "0 ACUまで停止できる条件の公式解説" }
     ]
   },
   alternatives: [

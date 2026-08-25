@@ -37,14 +37,14 @@ registerCase({
     },
     flow: [
       "各サービスがメトリクス（CPU・エラー数などの数値）とログをCloudWatchへ送る。AWSのマネージドサービスなら多くが自動で送ってくれる",
-      "同時にX-Ray SDKがリクエストにトレースID（処理の追跡番号）を付け、サービスをまたいだ処理の流れと所要時間をX-Rayへ記録する",
+      "同時にADOT（AWS Distro for OpenTelemetry。計測の業界標準OpenTelemetryのAWS版）をアプリに組み込み、リクエストにトレースID（処理の追跡番号）を付けて、サービスをまたいだ処理の流れと所要時間をX-Rayへ記録する",
       "CloudWatchアラームが「5分間のエラー率が1%超」などのしきい値を監視し、超えたらSNSへ発火する",
       "SNSがメールやチャット（Lambda連携でSlack等）へ通知し、運用者はユーザーより先に異常を知る",
       "運用者はCloudWatchダッシュボードで全体を把握し、X-Rayのサービスマップで「どのサービスのどこが遅いか」を特定する"
     ],
     services: [
       { icon: "services/cloudwatch", name: "Amazon CloudWatch", role: "メトリクス・ログ・アラーム・ダッシュボードを担う監視の中核。AWSサービスとの統合が自動的で導入の手間が最小" },
-      { icon: "services/x-ray", name: "AWS X-Ray", role: "分散トレーシング。複数サービスを流れる1リクエストを追跡し、遅延やエラーの発生箇所を可視化する" },
+      { icon: "services/x-ray", name: "AWS X-Ray", role: "分散トレーシング。複数サービスを流れる1リクエストを追跡し、遅延やエラーの発生箇所を可視化する。トレースの計測（送信側）はADOTで行い、X-Rayは保存・可視化先として使う" },
       { icon: "services/sns", name: "Amazon SNS", role: "アラームの通知ハブ。メール・Lambda・チャット連携など複数の宛先へ同時に配れる" },
       { icon: "services/lambda", name: "監視対象のアプリ", role: "図では代表としてLambdaを描いているが、ECS・EC2・API Gatewayなど何でも同じ形で監視できる" }
     ],
@@ -52,7 +52,8 @@ registerCase({
       "監視の3本柱は「メトリクス（数値の傾向）・ログ（個別の記録）・トレース（リクエストの流れ）」。この3つが揃って初めて「気づく→どこかを絞る→原因を読む」の流れが成立する",
       "アラームは最初から増やしすぎない。通知が多すぎると人が無視するようになる（アラート疲れ）ため、「ユーザー影響に直結する指標」（エラー率・レイテンシ・死活）から始めるのが定石",
       "ログは最初から構造化（JSON形式）で出すと、CloudWatch Logs Insightsでの検索・集計が桁違いに楽になる。printデバッグの延長の平文ログから早めに卒業する",
-      "X-Rayは全リクエストではなくサンプリング（一部を抽出して記録）で動くため、負荷とコストを抑えつつ傾向を掴める。導入はSDKの組み込みだけで始められる"
+      "X-Rayは全リクエストではなくサンプリング（一部を抽出して記録）で動くため、負荷とコストを抑えつつ傾向を掴める",
+      "計測の組み込みは、業界標準のOpenTelemetryをベースにしたADOT（AWS Distro for OpenTelemetry）を使うのがAWSの公式推奨。従来のX-Ray SDKは2026年2月にメンテナンスモード入りし（2027年2月にサポート終了予定）、新規導入には使わない。X-Ray自体はトレースの保存・可視化先として現役なので、「計測はADOT、可視化はX-Ray」という分担で覚える"
     ],
     pros: [
       "監視基盤自体の構築・運用がほぼ不要（フルマネージド）で、2人の運用体制でも回る",
@@ -70,8 +71,8 @@ registerCase({
       { title: "Amazon CloudWatchとは", url: "https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html" },
       { title: "CloudWatchアラームの作成", url: "https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html", note: "SNS通知つきアラームの作り方" },
       { title: "AWS X-Rayとは", url: "https://docs.aws.amazon.com/ja_jp/xray/latest/devguide/aws-xray.html" },
-      { title: "CloudWatch Logsとは", url: "https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html" },
-      { title: "Amazon SNSとは", url: "https://docs.aws.amazon.com/ja_jp/sns/latest/dg/welcome.html" }
+      { title: "AWS Distro for OpenTelemetry（ADOT）", url: "https://aws.amazon.com/jp/otel/", note: "計測側の公式推奨ディストリビューション" },
+      { title: "アプリケーションをインストルメント化する（X-Ray）", url: "https://docs.aws.amazon.com/ja_jp/xray/latest/devguide/xray-instrumenting-your-app.html", note: "ADOTとX-Ray SDKの位置づけの公式解説" }
     ]
   },
   alternatives: [
@@ -183,7 +184,7 @@ registerCase({
         "監視データを外部事業者に預けるため、契約・セキュリティの確認が必要",
         "SaaS障害時は監視も止まる（監視の依存先が増える）"
       ],
-      cost: "<strong>月数万円〜数十万円</strong>（規模による）。例としてインフラ監視はホストあたり月15〜23USD程度+ログ・APMの従量課金が一般的な価格帯。加えてCloudWatch API呼び出しやMetric Streams（更新100万件あたり約0.3USD）などAWS側の連携費用も発生する。",
+      cost: "<strong>月数万円〜数十万円</strong>（規模による）。例としてインフラ監視はホストあたり月15〜23USD程度+ログ・APMの従量課金が一般的な価格帯。加えてCloudWatch API呼び出しやMetric Streams（メトリクス更新1,000件あたり約0.003USD＝100万件あたり約3USD）などAWS側の連携費用も発生する。",
       references: [
         { title: "CloudWatch Metric Streams", url: "https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html", note: "外部SaaSへメトリクスをプッシュ配信するしくみ" },
         { title: "サードパーティーへのアクセス権限の付与", url: "https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html", note: "外部サービスへ安全に権限を渡すIAMロールの作法" },

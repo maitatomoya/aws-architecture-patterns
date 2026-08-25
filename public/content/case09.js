@@ -55,6 +55,7 @@ registerCase({
     ],
     points: [
       "プール型（全テナントで基盤を共用する方式）は、テナントが増えてもインフラがほぼ増えないためコスト効率が最も高い。その代償として「アプリのバグ1つで他社データが見える」リスクを背負うので、分離はコードの規律で守る",
+      "プール型とサイロ型の2択ではなく、間に「ブリッジ型」もある。アプリは全テナントで共用したまま、DBインスタンスやスキーマ（DB内の論理的な区画）だけをテナント別に分ける折衷案で、実務では「アプリは1系統で運用しつつ、データ分離の説明責任が重い顧客にはDBを分ける」形でよく使われる",
       "テナントIDはリクエストパラメータではなく、Cognitoが署名したトークンから取り出す。利用者が改ざんできない場所に分離の起点を置くのが鉄則",
       "DBアクセスは「テナントIDで必ず絞るデータアクセス層」を1か所に集約し、素のSQLを書かせない。PostgreSQLの行レベルセキュリティ（行単位のアクセス制御機能）を併用するとバグへの保険になる",
       "特定テナントの高負荷が全体を巻き込む「うるさい隣人問題」には、API Gatewayやアプリ側でのテナント別流量制限、将来的には大口テナントだけ専用リソースに退避するハイブリッド化で備える"
@@ -148,7 +149,7 @@ registerCase({
       cost: "<strong>月2万円〜5万円程度×テナント数</strong>（1テナントあたり最小のFargate+Aurora+ALB構成の場合）。10社で月20万〜50万円と、プール型との差はテナント数に比例して開く。テナント単価に環境費用を転嫁できる価格設定が前提になる。",
       references: [
         { title: "AWS Organizationsとは", url: "https://docs.aws.amazon.com/ja_jp/organizations/latest/userguide/orgs_introduction.html", note: "マルチアカウント統制の公式ユーザーガイド" },
-        { title: "SaaSテナント分離戦略（AWSホワイトペーパー）", url: "https://docs.aws.amazon.com/whitepapers/latest/saas-tenant-isolation-strategies/saas-tenant-isolation-strategies.html", note: "サイロ/プールの分離手法を体系的に解説（英語）" },
+        { title: "SaaSテナント分離戦略（AWSホワイトペーパー）", url: "https://docs.aws.amazon.com/whitepapers/latest/saas-tenant-isolation-strategies/saas-tenant-isolation-strategies.html", note: "サイロ/プールの分離手法を体系的に解説（英語）。2020年公開版で、公式が「歴史的参照（historical reference）」と明示している点に注意" },
         { title: "SaaSアーキテクチャの基礎（AWSホワイトペーパー）", url: "https://docs.aws.amazon.com/ja_jp/whitepapers/latest/saas-architecture-fundamentals/saas-architecture-fundamentals.html" }
       ]
     },

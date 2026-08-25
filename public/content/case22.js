@@ -68,7 +68,7 @@ registerCase({
     references: [
       { title: "Amazon Redshift Serverlessとは", url: "https://docs.aws.amazon.com/ja_jp/redshift/latest/mgmt/serverless-whatis.html", note: "使った時間だけ課金されるRedshift" },
       { title: "AWS Glueとは", url: "https://docs.aws.amazon.com/ja_jp/glue/latest/dg/what-is-glue.html" },
-      { title: "Amazon QuickSightとは", url: "https://docs.aws.amazon.com/ja_jp/quicksight/latest/user/welcome.html" },
+      { title: "Amazon Quickとは", url: "https://docs.aws.amazon.com/ja_jp/quicksight/latest/user/welcome.html", note: "旧QuickSight。公式ドキュメントは現在Amazon Quick名義" },
       { title: "SPICEへのデータのインポート", url: "https://docs.aws.amazon.com/ja_jp/quicksight/latest/user/spice.html", note: "工夫点で触れたインメモリキャッシュ" },
       { title: "Amazon Redshiftマネジメントガイド", url: "https://docs.aws.amazon.com/ja_jp/redshift/latest/mgmt/welcome.html" }
     ]
@@ -125,7 +125,7 @@ registerCase({
       references: [
         { title: "Amazon Athenaとは", url: "https://docs.aws.amazon.com/ja_jp/athena/latest/ug/what-is.html" },
         { title: "パーティション射影を使用したスキャン削減", url: "https://docs.aws.amazon.com/ja_jp/athena/latest/ug/partition-projection.html", note: "スキャン量＝費用を下げる定石" },
-        { title: "Amazon QuickSightとは", url: "https://docs.aws.amazon.com/ja_jp/quicksight/latest/user/welcome.html" }
+        { title: "Amazon Quickとは", url: "https://docs.aws.amazon.com/ja_jp/quicksight/latest/user/welcome.html", note: "旧QuickSight。公式ドキュメントは現在Amazon Quick名義" }
       ]
     },
     {
@@ -161,7 +161,7 @@ registerCase({
         "既存Webアプリはこれまでどおりプライマリ（書き込み担当のDB本体）に読み書きする",
         "Auroraのリードレプリカ（読み取り専用の複製DB）を追加し、プライマリの内容が自動で同期される",
         "Quick Suite（旧QuickSight）はVPC接続を使ってプライベートサブネット内のリードレプリカへ分析クエリを投げる",
-        "分析担当はQuickSightのダッシュボードを閲覧する。データはほぼリアルタイム"
+        "分析担当はQuick Suiteのダッシュボードを閲覧する。データはほぼリアルタイム"
       ],
       services: [
         { icon: "services/aurora", name: "Amazon Aurora", role: "既存のアプリDB。リードレプリカを追加するだけで分析用の読み取り口を分離できる" },
@@ -182,13 +182,27 @@ registerCase({
         "複数システムのデータを結合する横断分析はできない（DB内のデータに限られる）",
         "レプリカは常時起動のため、使わない夜間も課金される"
       ],
-      cost: "<strong>月1.5万円〜4万円程度</strong>（db.r6g.large相当のリードレプリカ1台を追加＋QuickSightライセンスの前提）。既存DBの流用なのでETL開発費はゼロだが、レプリカの常時起動費は固定でかかる。",
+      cost: "<strong>月1.5万円〜4万円程度</strong>（db.r6g.large相当のリードレプリカ1台を追加＋Quick Suiteライセンスの前提）。既存DBの流用なのでETL開発費はゼロだが、レプリカの常時起動費は固定でかかる。",
       references: [
         { title: "Amazon Auroraのレプリケーション", url: "https://docs.aws.amazon.com/ja_jp/AmazonRDS/latest/AuroraUserGuide/Aurora.Replication.html", note: "リードレプリカの仕組み" },
-        { title: "QuickSightからVPC内のデータに接続する", url: "https://docs.aws.amazon.com/ja_jp/quicksight/latest/user/working-with-aws-vpc.html" }
+        { title: "Amazon Quick SightでのVPC接続の設定", url: "https://docs.aws.amazon.com/ja_jp/quicksight/latest/user/working-with-aws-vpc.html", note: "プライベートサブネットのDBへ接続する方法" }
       ]
     }
   ],
   cost: "<p>推奨構成（Redshift）は<strong>月4万円〜15万円程度</strong>で、費用の大半をDWHの稼働費が占める。Athena案は<strong>月数百円〜1万円程度</strong>と圧倒的に安く、待機費用がない。Auroraレプリカ案は<strong>月1.5万円〜4万円程度</strong>でETL開発費が不要。判断の分かれ目は「データ量」「閲覧の頻度と同時人数」「横断分析の要否」の3つで、迷ったらAthenaで始めて成長に合わせてRedshiftへ昇格するのが安全。</p>",
-  summary: "<p>BIダッシュボードの裏側は「データをどこに集めて、何で集計するか」の選択です。<strong>王道はS3に集めてRedshiftで集計する構成</strong>ですが、DWHは常時稼働費が高いため、規模が小さいうちはAthenaのスキャン課金モデルが合理的です。重要なのは、どの案でも<strong>S3に生データを残しておけば後から乗り換えられる</strong>こと。最初の設計で決め切るのではなく、成長段階に応じて昇格できる形にしておくのがデータ基盤設計の勘所です。なお、BIツールのQuickSightは2025年10月に<strong>Amazon Quick Suite</strong>へ改称されました（BI機能はQuick Sightの表記）。SAA試験では旧称のQuickSightで出題される場合があるため、両方の名前を覚えておきましょう。</p>"
+  summary: "<p>BIダッシュボードの裏側は「データをどこに集めて、何で集計するか」の選択です。<strong>王道はS3に集めてRedshiftで集計する構成</strong>ですが、DWHは常時稼働費が高いため、規模が小さいうちはAthenaのスキャン課金モデルが合理的です。重要なのは、どの案でも<strong>S3に生データを残しておけば後から乗り換えられる</strong>こと。最初の設計で決め切るのではなく、成長段階に応じて昇格できる形にしておくのがデータ基盤設計の勘所です。なお、BIツールのQuickSightは2025年10月に<strong>Amazon Quick Suite</strong>へ改称されました（BI機能はQuick Sightの表記）。SAA試験では旧称のQuickSightで出題される場合があるため、両方の名前を覚えておきましょう。</p>",
+  quiz: [
+    {
+      q: "分析用にDWHを別途立てず、本番のDBへBIツールを直接つないだ場合、何が起きるでしょうか。",
+      a: "集計クエリは大量の行を読むため、本番DBのCPUとI/Oを奪い、サービス本体の応答が遅くなります。分析基盤を分けておけば、重いクエリが何本走っても顧客体験には波及しません。さらにRedshiftは列指向で大量集計に最適化されており、行指向の本番DBでは分単位かかる集計が秒で返ります。DWHを立てる一番の理由がこの2点です。"
+    },
+    {
+      q: "この構成で月額費用の大半を占めるのはどのサービスでしょうか。抑える手立てもあわせて考えてみましょう。",
+      a: "Redshiftのクラスター稼働費で、専有クラスタを常時起動すると月10万円を超えることも珍しくありません。夜間にロードし日中に参照する使い方であれば、使った時間だけ課金されるRedshift Serverlessが第一候補になります。加えてBIツール側のインメモリキャッシュへ集計結果を取り込めば、閲覧のたびにRedshiftへクエリが飛ばず、費用と表示速度の両方が改善します。"
+    },
+    {
+      q: "データは数十GB、閲覧者は分析担当2名、今月中に立ち上げたいという条件に変わりました。あなたならどの構成を選ぶでしょうか。",
+      a: "代替1のAthenaとBIツールの組み合わせで始めます。ロード工程もクラスターも要らず、費用はS3の保存料とスキャン量だけなので、この規模なら十分実用になります。重要なのは、S3に生データを置く形はどちらの案でも同じだという点です。閲覧者が増えて応答が苦しくなったらRedshiftへ昇格でき、データを作り直す必要はありません。"
+    }
+  ]
 });

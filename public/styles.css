@@ -437,9 +437,9 @@ button:disabled { opacity: 0.6; cursor: wait; }
   color: #fff;
 }
 
-/* 参考資料リスト（ケース一覧の末尾に置く付録リンク） */
-.toc-resources {
-  border-bottom: none;
+/* 付録リンク（参考資料リスト・用語集）。ケース一覧の末尾にまとめて置く */
+.toc-appendix { border-bottom: none; }
+.toc-appendix-first {
   border-top: 1px solid var(--border);
   margin-top: 8px;
 }
@@ -572,3 +572,277 @@ button:disabled { opacity: 0.6; cursor: wait; }
 
 .cost, .case-summary { background: var(--bg-side); border-radius: 8px; padding: 12px 18px; }
 #case-nav { display: flex; justify-content: space-between; align-items: center; margin: 30px 0 10px; gap: 12px; }
+
+/* ---- 理解度チェック（確認問題） ---- */
+.quiz {
+  background: #fff7f0;
+  border: 1px solid #f0c9b5;
+  border-radius: 10px;
+  padding: 4px 20px 16px;
+  margin: 24px 0 6px;
+}
+
+.quiz-lead { font-size: 14px; color: var(--text); margin: 0 0 12px; }
+
+.quiz-item {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0;
+}
+
+.quiz-item > summary {
+  cursor: pointer;
+  padding: 10px 14px;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.7;
+  list-style-position: outside;
+}
+
+.quiz-item > summary:hover { background: var(--bg-side); border-radius: 8px; }
+.quiz-item[open] > summary { border-radius: 8px 8px 0 0; }
+
+/* キーボード操作でも開閉位置が分かるようフォーカスリングを明示する */
+.quiz-item > summary:focus-visible {
+  outline: 2px solid var(--rust-orange-dark);
+  outline-offset: -2px;
+  border-radius: 8px;
+}
+
+.quiz-no {
+  display: inline-block;
+  background: var(--rust-orange-dark);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 1px 8px;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+.quiz-a {
+  border-top: 1px dashed var(--border);
+  padding: 10px 14px 12px;
+  font-size: 14px;
+}
+
+.quiz-a-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--rust-orange-dark);
+  margin-bottom: 4px;
+}
+
+.quiz-a p { margin: 6px 0; }
+.quiz-a ul, .quiz-a ol { margin: 6px 0; padding-left: 22px; }
+
+/* ---- 構成図の拡大 ---- */
+/* バッジは図に重ねず上に置く。図のラベルと重なって読めなくなるのを避けるため */
+.diagram-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 14px 0;
+}
+
+.diagram-box .diagram-wrap {
+  width: 100%;
+  margin: 0;
+  cursor: zoom-in;
+  border-radius: 8px;
+}
+
+.diagram-box .diagram-wrap:hover { background: #fffaf5; outline: 1px solid #f0c9b5; }
+.diagram-box .diagram-wrap:focus-visible {
+  outline: 2px solid var(--rust-orange-dark);
+  outline-offset: 2px;
+}
+
+.diagram-zoom-hint {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--rust-orange-dark);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 1px 10px;
+  margin-bottom: 4px;
+  pointer-events: none;
+}
+
+#diagram-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+#diagram-modal[hidden] { display: none; }
+body.modal-open { overflow: hidden; }
+
+.modal-panel {
+  background: #fff;
+  border-radius: 12px;
+  width: min(1600px, 96vw);
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 16px;
+  color: var(--rust-orange-dark);
+}
+
+.modal-close:focus-visible, .mini-btn:focus-visible {
+  outline: 2px solid var(--rust-orange-dark);
+  outline-offset: 2px;
+}
+
+/* 縦に長い図はモーダル内でスクロールする */
+.modal-body { overflow: auto; padding: 12px 16px 20px; }
+.modal-body:focus-visible { outline: 2px solid var(--rust-orange-dark); outline-offset: -2px; }
+.modal-body .dg-zoom { width: 100%; min-width: 900px; height: auto; }
+
+/* ---- 進捗の持ち出し・読み込み ---- */
+#progress-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+.mini-btn {
+  font-size: 11.5px;
+  padding: 3px 9px;
+  border-radius: 5px;
+  line-height: 1.6;
+}
+
+.mini-btn.primary {
+  font-size: 11.5px;
+  padding: 3px 9px;
+}
+
+#progress-panel {
+  margin-top: 8px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+#progress-panel[hidden] { display: none; }
+
+#progress-panel label {
+  display: block;
+  font-size: 11.5px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+#progress-panel textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 7px;
+  resize: vertical;
+}
+
+#progress-panel textarea:focus {
+  outline: 2px solid var(--rust-orange-dark);
+  outline-offset: 1px;
+}
+
+.panel-actions { display: flex; gap: 6px; margin-top: 6px; }
+.panel-note { margin: 6px 0 0; font-size: 11px; color: var(--text-sub); }
+
+#progress-msg {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  color: var(--text);
+  background: #fff7f0;
+  border-left: 3px solid var(--rust-orange-dark);
+  border-radius: 4px;
+  padding: 5px 8px;
+}
+
+#progress-msg[hidden] { display: none; }
+
+/* ---- 用語集 ---- */
+.glossary-lead { font-size: 14.5px; }
+
+.glossary-search-wrap {
+  background: var(--bg-side);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 16px 0 24px;
+}
+
+.glossary-search-wrap label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+#glossary-search {
+  width: 100%;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+#glossary-search::placeholder { color: var(--text-sub); }
+
+#glossary-search:focus {
+  outline: 2px solid var(--rust-orange-dark);
+  outline-offset: 1px;
+  border-color: var(--rust-orange-dark);
+}
+
+#glossary-count { margin: 6px 0 0; font-size: 12.5px; color: var(--text); }
+
+.glossary-group[hidden] { display: none; }
+.glossary-group h3 { scroll-margin-top: 12px; }
+
+.glossary-term {
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--rust-orange);
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin: 10px 0;
+}
+
+.glossary-term[hidden] { display: none; }
+
+.gt-name { margin: 0 0 4px; font-size: 15.5px; }
+.gt-full { font-size: 12.5px; font-weight: 400; color: var(--text-sub); }
+.gt-desc { font-size: 14px; }
+.gt-desc p { margin: 4px 0; }
+
+.gt-cases { margin: 6px 0 0; font-size: 13px; color: var(--text); }
+.gt-cases a { color: var(--rust-orange-dark); }
+.gt-cases a:hover { color: var(--rust-orange); }

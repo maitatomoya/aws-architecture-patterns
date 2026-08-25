@@ -11,11 +11,19 @@
     <aside id="sidebar">
       <header id="sidebar-header">
         <h1>AWS Architecture Patterns</h1>
-        <div id="progress-wrap" title="読了チェックはこのブラウザにのみ保存されます">
+        <div id="progress-wrap" title="読了チェックはこのブラウザにのみ保存されます。端末を移すときは「進捗をコピー」で書き出してください">
           <div id="progress-bar" role="progressbar" aria-label="読了ケース数"
                aria-valuemin="0" aria-valuemax="50" aria-valuenow="0"><div id="progress-fill"></div></div>
           <span id="progress-label">0 / 0</span>
         </div>
+        <div id="progress-actions">
+          <button type="button" id="btn-progress-export" class="mini-btn"
+                  title="読了状況を文字列にしてコピーします。別の端末で「読み込む」に貼り付けると復元できます">進捗をコピー</button>
+          <button type="button" id="btn-progress-import" class="mini-btn"
+                  aria-expanded="false" title="コピーした進捗の文字列を貼り付けて読み込みます">読み込む</button>
+        </div>
+        <div id="progress-panel" hidden></div>
+        <p id="progress-msg" role="status" aria-live="polite" hidden></p>
       </header>
       <div id="toc-search-wrap">
         <input type="search" id="toc-search" placeholder="ケースを検索（サービス名でも）"
@@ -37,6 +45,7 @@
   <script defer src="app-register.js"></script>
   <script defer src="content/intro.js"></script>
   <script defer src="content/resources.js"></script>
+  <script defer src="content/glossary.js"></script>
   <script defer src="content/case01.js"></script>
   <script defer src="content/case02.js"></script>
   <script defer src="content/case03.js"></script>

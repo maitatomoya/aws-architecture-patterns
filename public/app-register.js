@@ -5,6 +5,7 @@
 window.AWS_CASES = [];
 window.AWS_INTRO = null;
 window.AWS_RESOURCES = null;
+window.AWS_GLOSSARY = null;
 
 function registerCase(c) {
   window.AWS_CASES.push(c);
@@ -16,4 +17,8 @@ function registerIntro(intro) {
 
 function registerResources(r) {
   window.AWS_RESOURCES = r;
+}
+
+function registerGlossary(g) {
+  window.AWS_GLOSSARY = g;
 }

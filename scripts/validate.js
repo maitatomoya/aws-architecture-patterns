@@ -126,10 +126,25 @@ function validateDiagram(file, d, label) {
   }
 }
 
+function validateQuiz(file, quiz) {
+  if (!quiz || !quiz.length) {
+    err(file, "quiz（確認問題）がない");
+    return;
+  }
+  if (quiz.length < 2 || quiz.length > 3) {
+    err(file, `quizは2〜3問にする（現在${quiz.length}問）`);
+  }
+  quiz.forEach((item, i) => {
+    if (!item.q || !item.a) err(file, `quiz${i + 1}: q/aがない`);
+    if (item.a && item.a.length < 40) err(file, `quiz${i + 1}: 答えの解説が短すぎる`);
+  });
+}
+
 function validateCase(file, c) {
   ["id", "category", "title", "scenario", "requirements", "main", "summary"].forEach((k) => {
     if (c[k] == null) err(file, `必須フィールド ${k} がない`);
   });
+  validateQuiz(file, c.quiz);
   if (c.main) validatePattern(file, c.main, "main");
   if (!c.alternatives || c.alternatives.length === 0) {
     err(file, "alternativesがない（代替パターン1つ以上必須）");

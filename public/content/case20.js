@@ -87,7 +87,7 @@ registerCase({
           { id: "src", icon: "resources/documents", label: "業務データ\n(DB/ログ/CSV)", col: 0, row: 0 },
           { id: "s3", icon: "services/s3", label: "S3\nステージング", col: 1, row: 0 },
           { id: "rs", icon: "services/redshift", label: "Redshift\nDWH", col: 2, row: 0 },
-          { id: "qs", icon: "services/quicksight", label: "QuickSight\nBIダッシュボード", col: 3, row: 0 },
+          { id: "qs", icon: "services/quicksight", label: "Quick Suite\nBIダッシュボード", col: 3, row: 0 },
           { id: "analyst", icon: "resources/user", label: "分析者・事業部", col: 4, row: 0 }
         ],
         edges: [
@@ -100,13 +100,13 @@ registerCase({
       flow: [
         "各システムのデータをいったんS3へ集約する（ステージング＝ロード前の待機場所）",
         "RedshiftのCOPYコマンドでS3から一括ロードする。データはRedshift内部の列指向ストレージに最適化された形で保持される",
-        "QuickSight（マネージドBIツール）のダッシュボードがRedshiftへクエリし、集計済みの指標を高速に表示する",
+        "Amazon Quick Suite（旧QuickSight。マネージドBIツール）のダッシュボードがRedshiftへクエリし、集計済みの指標を高速に表示する",
         "分析者・事業部メンバーはブラウザからダッシュボードを閲覧する"
       ],
       services: [
         { icon: "services/redshift", name: "Amazon Redshift", role: "分析専用のデータウェアハウス。大量データの集計クエリを秒以下〜数秒で返す" },
         { icon: "services/s3", name: "Amazon S3", role: "ロード前のステージング置き場。Redshiftへの取り込みはS3経由が定石" },
-        { icon: "services/quicksight", name: "Amazon QuickSight", role: "マネージドBIサービス。ダッシュボード作成と共有をブラウザだけで完結できる" }
+        { icon: "services/quicksight", name: "Amazon Quick Suite（旧QuickSight）", role: "マネージドBIサービス。ダッシュボード作成と共有をブラウザだけで完結できる" }
       ],
       points: [
         "クエリのたびにファイルを読むAthenaと違い、Redshiftは取り込み済みデータに対して統計情報・圧縮・分散を最適化するため、同じSQLでも応答速度が桁で速い",
@@ -124,11 +124,11 @@ registerCase({
         "取り込み（ロード）という工程が増え、鮮度はロード頻度に依存する",
         "スキーマ設計・分散キー設計などDWH固有の設計知識が必要"
       ],
-      cost: "<strong>月1万円〜15万円程度</strong>（Redshift Serverlessで1日2時間程度の利用なら約1.5万円、常時稼働のra3クラスターは月10万円超+QuickSight1ユーザー約1,300円〜）。",
+      cost: "<strong>月1万円〜15万円程度</strong>（Redshift Serverlessで1日2時間程度の利用なら約1.5万円、常時稼働のra3クラスターは月10万円超+Quick Suite1ユーザー約1,300円〜）。",
       references: [
         { title: "Amazon Redshiftとは", url: "https://docs.aws.amazon.com/ja_jp/redshift/latest/mgmt/welcome.html" },
         { title: "COPYコマンド", url: "https://docs.aws.amazon.com/ja_jp/redshift/latest/dg/r_COPY.html", note: "S3からの一括ロードの一次情報" },
-        { title: "Amazon QuickSightとは", url: "https://docs.aws.amazon.com/ja_jp/quicksight/latest/user/welcome.html" }
+        { title: "Amazon Quickとは", url: "https://docs.aws.amazon.com/ja_jp/quicksight/latest/user/welcome.html", note: "旧QuickSight。公式ドキュメントは現在Amazon Quick名義" }
       ]
     },
     {
@@ -185,7 +185,7 @@ registerCase({
         "SQLでの複雑な結合・集計分析は不得意で、データレイクの代替にはならない",
         "インデックス設計・ノードサイジングなど運用ノウハウが必要"
       ],
-      cost: "<strong>月5,000円〜数万円</strong>（検証用t3.small.search 1台+ストレージで約5,000円、本番のマルチAZ 3台構成では月3万円〜+Firehose転送量）。",
+      cost: "<strong>月6,500円〜数万円</strong>（検証用t3.small.search 1台+ストレージ20GBで約6,500円。東京リージョンの単価は1時間あたり0.056USD。本番のマルチAZ 3台構成では月3万円〜+Firehose転送量）。",
       references: [
         { title: "Amazon OpenSearch Serviceとは", url: "https://docs.aws.amazon.com/ja_jp/opensearch-service/latest/developerguide/what-is.html" },
         { title: "VPC内でのOpenSearch Serviceドメインの起動", url: "https://docs.aws.amazon.com/ja_jp/opensearch-service/latest/developerguide/vpc.html", note: "VPC配置とアクセス経路の一次情報" },
@@ -194,5 +194,19 @@ registerCase({
     }
   ],
   cost: "<p>推奨構成（S3+Glue+Athena）は<strong>月3,000円〜1万円程度</strong>で、分析しない日は保存料だけ。Redshift案は<strong>月1万円〜15万円程度</strong>で、定型・高頻度分析が多いほど1クエリあたりの単価で有利になる。OpenSearch案は<strong>月5,000円〜数万円</strong>の常時稼働型で、用途がログ検索なら最も効果的。まず全データをS3に集約しておけば、後からどの案へも広げられる。</p>",
-  summary: "<p>データ基盤の第一歩は<strong>「とにかく全部S3へ集め、カタログで目次を付ける」</strong>ことです。S3+Glue+Athenaのサーバーレスデータレイクは初期費用ほぼゼロで始められ、しかもここで作ったS3とカタログはRedshiftにもOpenSearchにもそのまま接続できる「将来の共通土台」になります。選び分けの軸は問いの形で、アドホックなSQLならAthena、定型・高頻度のダッシュボードならRedshift、キーワード検索ならOpenSearch。<strong>ツール選びより先にParquet化とパーティション設計</strong>、これがコストを桁で左右する実務の急所です。</p>"
+  summary: "<p>データ基盤の第一歩は<strong>「とにかく全部S3へ集め、カタログで目次を付ける」</strong>ことです。S3+Glue+Athenaのサーバーレスデータレイクは初期費用ほぼゼロで始められ、しかもここで作ったS3とカタログはRedshiftにもOpenSearchにもそのまま接続できる「将来の共通土台」になります。選び分けの軸は問いの形で、アドホックなSQLならAthena、定型・高頻度のダッシュボードならRedshift、キーワード検索ならOpenSearch。<strong>ツール選びより先にParquet化とパーティション設計</strong>、これがコストを桁で左右する実務の急所です。</p>",
+  quiz: [
+    {
+      q: "S3を生データ層と加工済み層の2つに分けています。加工後のデータだけを残す運用にすると、後で何に困るか考えてみましょう。",
+      a: "変換ロジックの誤りに後から気づいても、作り直す材料が残っていません。集計時に落とした列や誤って丸めた値は、加工済みデータからは復元できないからです。生データを残しておけば、要件が変わっても何度でも作り直せます。<strong>元データは消さない</strong>というのがデータ基盤の鉄則で、S3の保存単価が安いからこそ成り立つ設計です。"
+    },
+    {
+      q: "Athenaの費用が想定外に膨らむのはどんなときでしょうか。構成を組む前に決めておくべきことは何でしょうか。",
+      a: "Athenaはスキャンしたバイト数で課金されるため、CSVやJSONのまま置いたデータを毎回全件読ませると費用が跳ね上がります。加工済み層をParquet（列指向の圧縮形式）にし、日付でパーティション分割しておけば、必要な列と期間だけを読むのでスキャン量が桁で減ります。ツール選定より先にこの形式とパーティションの設計を決めるのが実務の急所です。"
+    },
+    {
+      q: "「毎朝30人の事業部メンバーが同じダッシュボードを開き、表示は数秒以内に」という要件が追加されました。あなたなら構成をどう変えるでしょうか。",
+      a: "Athenaは応答が数秒から数十秒かかるうえ同時実行数にも上限があるため、この用途では代替1のRedshiftとBIツールの組み合わせへ寄せます。ただしデータレイクを捨てる必要はなく、S3に全量を溜めてよく使う部分だけRedshiftへロードする二段構えが実務での最終形です。データカタログを整備してあれば同じテーブル定義を使い回せます。ダッシュボード側の設計はケース22で詳しく扱います。"
+    }
+  ]
 });

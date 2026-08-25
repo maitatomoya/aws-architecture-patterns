@@ -131,7 +131,12 @@
     );
   }
 
-  function render(spec) {
+  /**
+   * 構成図SVGを生成する。
+   * @param {Object} spec 図のJSON仕様（nodes/groups/edges）
+   * @param {string} [title] パターン名。SVGの代替テキスト（aria-label）に使う
+   */
+  function render(spec, title) {
     var cols = spec.cols || (Math.max.apply(null, spec.nodes.map(function (n) { return n.col; })) + 1);
     var rows = spec.rows || (Math.max.apply(null, spec.nodes.map(function (n) { return n.row; })) + 1);
     var width = 80 + cols * COL_W;
@@ -147,7 +152,8 @@
     var nodes = spec.nodes.map(nodeSvg).join("");
 
     return (
-      '<svg class="dg" viewBox="0 0 ' + width + " " + height + '" xmlns="http://www.w3.org/2000/svg" role="img">' +
+      '<svg class="dg" viewBox="0 0 ' + width + " " + height + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' +
+      esc(title ? "構成図：" + title : "AWS構成図") + '">' +
       '<defs><marker id="dg-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">' +
       '<path d="M 0 0 L 10 5 L 0 10 z" fill="#545B64"/></marker></defs>' +
       groups + edges + nodes +

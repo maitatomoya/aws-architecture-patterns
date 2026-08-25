@@ -125,7 +125,7 @@ registerCase({
       cost: "<strong>月数十円〜数百円</strong>（S3保存料＋CloudFront転送量のみ。WordPress本体は社内PC等で動かす前提）。公開側の固定費がなくなるのが最大の違い。",
       references: [
         { title: "Amazon S3を使用して静的ウェブサイトをホスティングする", url: "https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/WebsiteHosting.html" },
-        { title: "CloudFrontとS3で安全な静的ウェブサイトを始める", url: "https://docs.aws.amazon.com/ja_jp/AmazonCloudFront/latest/DeveloperGuide/getting-started-secure-static-website-cloudfront-s3.html" },
+        { title: "Amazon CloudFrontによるウェブサイトの高速化", url: "https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/website-hosting-cloudfront-walkthrough.html", note: "S3+CloudFront配信の公式チュートリアル" },
         { title: "ファイルを無効化してキャッシュを削除する（Invalidation）", url: "https://docs.aws.amazon.com/ja_jp/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html", note: "書き出し後の反映に必須の操作" }
       ]
     },
@@ -174,7 +174,7 @@ registerCase({
       points: [
         "WordPressはファイルに状態を持つ（テーマ・プラグイン・アップロード）ため、コンテナ化にはEFSのような共有ストレージが必須になる。ここがステートレスなアプリとの大きな違い",
         "コンテナを2台以上にすればローリング更新（1台ずつ入れ替え）ができ、EC2の1台構成と違って無停止でアップデートできる",
-        "NATゲートウェイは時間課金で意外と高い（月5,000円前後）。コスト重視ならS3用のゲートウェイ型VPCエンドポイント併用などの工夫を検討する",
+        "NATゲートウェイは時間課金で意外と高い（月約45USD、約6,800円）。コスト重視ならS3用のゲートウェイ型VPCエンドポイント併用などの工夫を検討する",
         "前段にCloudFrontを足す構成は推奨構成と同じ考え方で追加できる（図では省略）"
       ],
       pros: [

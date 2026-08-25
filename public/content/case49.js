@@ -59,11 +59,12 @@ registerCase({
       "この方式は「ウォームスタンバイ」と呼ばれ、待機側にも縮小版のシステムを常時動かしておく。RTO1時間以内の要件は、ゼロから作り直す方式（バックアップ&リストア）では満たせないため、この方式を選んだ",
       "DRの最難関はDBの切り替え。Auroraグローバルデータベースは複製遅延が通常1秒未満で、昇格も分単位のため、RPO数秒・RTO1時間の要件に現実的に届く",
       "図はDRの構造に焦点を当てるため、各リージョン内のVPC・インターネットゲートウェイ・アプリサーバー群を省略している。実物は各リージョンにWeb3層構成（別ケース参照）が丸ごと入る",
-      "フェイルオーバーは「切り替わること」より「切り戻しと訓練」が難しい。年1回のDR訓練を要件に入れたのは、訓練していないDRは本番で高確率で失敗するため"
+      "フェイルオーバーは「切り替わること」より「切り戻しと訓練」が難しい。年1回のDR訓練を要件に入れたのは、訓練していないDRは本番で高確率で失敗するため",
+      "「深夜でも人手なし」で完了するのはDNS層の切り替えまでという点に注意。Auroraグローバルデータベースのセカンダリ昇格は自動では発動せず、手動操作か、EventBridge＋Lambda等で自作した昇格の自動化が必要になる。RTO1時間を守るには、夜間も対応できるオンコール体制を組むか、昇格の自動化まで作り込んでおくことが前提"
     ],
     pros: [
       "RTO分単位〜1時間・RPO数秒という高い目標を現実的なコストで達成できる",
-      "Route 53のヘルスチェックにより、深夜でも人手なしで切り替えが始まる",
+      "Route 53のヘルスチェックにより、DNS層の切り替えは深夜でも人手なしで始まる（DB昇格は別途、体制か自動化が必要）",
       "待機系が常時動いているため、DR訓練や切り替えテストがやりやすい",
       "Auroraの昇格・S3の複製などリージョン間連携がマネージドで、自作の複製機構が不要"
     ],
@@ -211,5 +212,5 @@ registerCase({
     }
   ],
   cost: "<p>DRのコストはRTO/RPOとの交換で決まる。バックアップ&リストア方式は<strong>月数千円〜2万円程度</strong>（RTO半日〜数日・RPO最大24時間）、パイロットライト方式は<strong>月2万円〜8万円程度</strong>（RTO数十分〜数時間・RPO数分）、推奨のウォームスタンバイは<strong>月8万円〜30万円程度</strong>（RTO分単位〜1時間・RPO数秒）が目安（いずれも本番が月10万円規模の場合）。「RTOを1桁縮めると費用も1桁近く上がる」という関係を経営層に示し、業務ごとに方式を使い分けるのが実務の落としどころ。</p>",
-  summary: "<p>DR設計は技術選定の前に<strong>RTO（どれだけ早く復旧するか）とRPO（どれだけのデータ損失を許すか）を決める</strong>ことがすべての出発点です。この2つの数字が決まれば、方式はほぼ自動的に決まります。バックアップ&リストア→パイロットライト→ウォームスタンバイ（→さらに上のマルチサイト・アクティブ/アクティブ）の順にRTO/RPOが良くなり、費用も上がる階段構造をまず覚えましょう。そして最重要の教訓は「訓練していないDRは動かない」。年1回の切り替え訓練までを含めて初めてDRは完成します。全ワークロード一律ではなく、業務の重要度ごとに方式を混ぜるのが現実的な設計です。</p>"
+  summary: "<p>DR設計は技術選定の前に<strong>RTO（どれだけ早く復旧するか）とRPO（どれだけのデータ損失を許すか）を決める</strong>ことがすべての出発点です。この2つの数字が決まれば、方式はほぼ自動的に決まります。バックアップ&リストア→パイロットライト→ウォームスタンバイ（→さらに上のマルチサイト・アクティブ/アクティブ）の順にRTO/RPOが良くなり、費用も上がる階段構造をまず覚えましょう。</p><table style=\"border-collapse:collapse;margin:12px 0;font-size:14px;width:100%;\"><thead><tr><th style=\"border:1px solid var(--border);padding:6px 10px;text-align:left;background:var(--bg);\">方式</th><th style=\"border:1px solid var(--border);padding:6px 10px;text-align:left;background:var(--bg);\">RTO（復旧時間）</th><th style=\"border:1px solid var(--border);padding:6px 10px;text-align:left;background:var(--bg);\">RPO（データ損失）</th><th style=\"border:1px solid var(--border);padding:6px 10px;text-align:left;background:var(--bg);\">平常時の待機コスト</th></tr></thead><tbody><tr><td style=\"border:1px solid var(--border);padding:6px 10px;\">バックアップ&リストア</td><td style=\"border:1px solid var(--border);padding:6px 10px;\">半日〜数日</td><td style=\"border:1px solid var(--border);padding:6px 10px;\">最大24時間（日次バックアップの場合）</td><td style=\"border:1px solid var(--border);padding:6px 10px;\">最小（バックアップ保管料のみ）</td></tr><tr><td style=\"border:1px solid var(--border);padding:6px 10px;\">パイロットライト</td><td style=\"border:1px solid var(--border);padding:6px 10px;\">数十分〜数時間</td><td style=\"border:1px solid var(--border);padding:6px 10px;\">数分</td><td style=\"border:1px solid var(--border);padding:6px 10px;\">小（DB複製など種火だけ常時稼働）</td></tr><tr><td style=\"border:1px solid var(--border);padding:6px 10px;\">ウォームスタンバイ（本ケース推奨）</td><td style=\"border:1px solid var(--border);padding:6px 10px;\">分単位〜1時間</td><td style=\"border:1px solid var(--border);padding:6px 10px;\">数秒〜数分</td><td style=\"border:1px solid var(--border);padding:6px 10px;\">中（縮小版システムを常時稼働）</td></tr><tr><td style=\"border:1px solid var(--border);padding:6px 10px;\">マルチサイト・アクティブ/アクティブ</td><td style=\"border:1px solid var(--border);padding:6px 10px;\">ほぼゼロ〜数分</td><td style=\"border:1px solid var(--border);padding:6px 10px;\">ほぼゼロ</td><td style=\"border:1px solid var(--border);padding:6px 10px;\">大（両リージョンで本番同等を稼働）</td></tr></tbody></table><p>そして最重要の教訓は「訓練していないDRは動かない」。年1回の切り替え訓練までを含めて初めてDRは完成します。全ワークロード一律ではなく、業務の重要度ごとに方式を混ぜるのが現実的な設計です。</p>"
 });

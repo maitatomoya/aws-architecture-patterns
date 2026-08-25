@@ -98,19 +98,19 @@ registerCase({
         ]
       },
       flow: [
-        "センサーがIoT CoreへMQTTで測定値を送る（認証はmain案と同じ証明書方式）",
+        "センサーがIoT CoreへMQTTで測定値を送る（認証は推奨構成と同じ証明書方式）",
         "IoT CoreのルールがメッセージごとにLambdaを起動し、閾値チェックなどの軽い処理を行う",
         "LambdaがDynamoDBへ最新値と履歴を書き込む。閲覧アプリはAPI Gateway＋Lambda経由でこのテーブルを読む（図では省略）"
       ],
       services: [
-        { icon: "services/iot-core", name: "AWS IoT Core", role: "MQTTの受け口と証明書認証。main案と同じ役割" },
+        { icon: "services/iot-core", name: "AWS IoT Core", role: "MQTTの受け口と証明書認証。推奨構成と同じ役割" },
         { icon: "services/lambda", name: "AWS Lambda", role: "受信メッセージ単位の処理。閾値超過の通知などもここに書ける" },
         { icon: "services/dynamodb", name: "Amazon DynamoDB", role: "最新値の即時参照に強いNoSQL DB。ミリ秒で読める" }
       ],
       points: [
         "DynamoDBは「デバイスID＋タイムスタンプ」を主キーにすると、最新値の取得も期間指定の履歴取得も1つのテーブルで効率よく引ける",
         "古いデータはTTL（有効期限）で自動削除し、長期保存が必要になったらS3エクスポートを併用する",
-        "メッセージ量が増えるとLambda起動回数がそのまま費用になる。1台あたり秒単位の送信頻度になったらmain案（ストリーム経由）への切り替えを検討する"
+        "メッセージ量が増えるとLambda起動回数がそのまま費用になる。1台あたり秒単位の送信頻度になったら推奨構成（ストリーム経由）への切り替えを検討する"
       ],
       pros: [
         "構成が小さく理解しやすい。受信から参照までのタイムラグが秒未満",
@@ -161,14 +161,14 @@ registerCase({
       services: [
         { icon: "services/msk", name: "Amazon MSK", role: "Apache Kafkaのマネージドサービス。ブローカーの構築・パッチをAWSに任せられる" },
         { icon: "services/ecs", name: "Amazon ECS", role: "既存のKafkaコンシューマーアプリをコンテナで動かす実行基盤" },
-        { icon: "services/s3", name: "Amazon S3", role: "加工済みデータの長期保存先。ここから先はmain案と同じくAthena分析につなげられる" },
+        { icon: "services/s3", name: "Amazon S3", role: "加工済みデータの長期保存先。ここから先は推奨構成と同じくAthena分析につなげられる" },
         { icon: "resources/internet-gateway", name: "インターネットゲートウェイ", role: "VPCの玄関。MSKはVPC内で動くサービスなので、外部からの入口が必要になる" }
       ],
       points: [
-        "MSKはVPC内で動くサービスなので、main案（全てVPC外のマネージドサービス）と違いVPC・サブネット設計が必要になる。工場と閉域でつなぐならVPNやDirect Connect接続も選べる",
+        "MSKはVPC内で動くサービスなので、推奨構成（全てVPC外のマネージドサービス）と違いVPC・サブネット設計が必要になる。工場と閉域でつなぐならVPNやDirect Connect接続も選べる",
         "最大の価値は既存のKafkaプロデューサー・コンシューマーのコードをほぼ無改修で移行できること。Kafka Connectなどのエコシステムもそのまま使える",
         "ブローカーは常時起動の固定費。小規模・変動が大きい場合はMSK Serverlessという従量課金の選択肢もある",
-        "Kafka資産がないなら、運用がより軽いKinesis（main案）を選ぶのがAWSでの定石"
+        "Kafka資産がないなら、運用がより軽いKinesis（推奨構成）を選ぶのがAWSでの定石"
       ],
       pros: [
         "既存Kafka資産（コード・運用ノウハウ・Connect連携）を最大限活かせる",
@@ -178,7 +178,7 @@ registerCase({
       cons: [
         "ブローカー常時起動の固定費が高く、小規模には割に合わない",
         "VPC・スケーリング・パーティション設計などKafka自体の専門知識は引き続き必要",
-        "main案と比べて構成要素の運用責任（コンシューマーアプリ等）が残る"
+        "推奨構成と比べて構成要素の運用責任（コンシューマーアプリ等）が残る"
       ],
       cost: "<strong>月5万円〜15万円程度</strong>（kafka.m5.large相当×2〜3ブローカー＋ストレージの常時起動＋ECSタスクの想定。同じ流量ならKinesis案の数倍になりやすい）。",
       references: [

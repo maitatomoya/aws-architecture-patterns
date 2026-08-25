@@ -65,7 +65,7 @@ registerCase({
       "エンドポイントが増えるとLambda関数の管理が煩雑になり、IaC（コードでのインフラ管理）がほぼ必須になる",
       "DynamoDBのキー設計はRDBと発想が異なり、慣れるまで設計ミスをしやすい"
     ],
-    cost: "<strong>月0円〜数千円</strong>（月100万リクエストでAPI Gateway約520円＋Lambda約100円＋DynamoDBオンデマンド少量。無料枠内なら実質0円で、完全にリクエスト数比例）。",
+    cost: "<strong>月0円〜数千円</strong>（月100万リクエストでAPI Gateway約520円＋Lambda約100円＋DynamoDBオンデマンド少量。無料枠内なら実質0円で、完全にリクエスト数比例）。ただしAPI Gatewayの無料枠（月100万リクエスト）は利用開始から12か月限定。LambdaやDynamoDBの無料枠は期限のない恒久枠なので、13か月目以降はAPI Gatewayぶんだけ課金が始まる点に注意。",
     references: [
       { title: "Amazon API Gatewayとは", url: "https://docs.aws.amazon.com/ja_jp/apigateway/latest/developerguide/welcome.html", note: "API Gateway公式開発者ガイド" },
       { title: "AWS Lambdaとは", url: "https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/welcome.html" },
@@ -120,7 +120,7 @@ registerCase({
       points: [
         "常駐プロセスなのでコールドスタートがなく、実行時間制限もない。Lambdaの制約（29秒/15分）に引っかかる要件が出たらこちらに寄せる",
         "コンテナはプライベートサブネットに置き、入口をALBに一本化する。APIコンテナに直接インターネットから届かせないのがセキュリティの基本形",
-        "NATゲートウェイは約5,000円/月の固定費と転送課金がかかる。DynamoDBやS3へのアクセスが主ならVPCエンドポイントに置き換えると安く安全になる",
+        "NATゲートウェイは月約45USD（約6,800円）の固定費と転送課金がかかる。DynamoDBやS3へのアクセスが主ならVPCエンドポイントに置き換えると安く安全になる",
         "ExpressやSpring Bootなど手元で動くフレームワークをほぼそのままデプロイでき、ローカル開発と本番の差が小さい"
       ],
       pros: [
@@ -129,11 +129,11 @@ registerCase({
         "CPU・メモリをタスク単位で細かく指定でき、性能の予測が立てやすい"
       ],
       cons: [
-        "最低1コンテナ＋ALB＋NATの常駐固定費がかかり、利用ゼロでも月1万円前後かかる",
+        "最低1コンテナ＋ALB＋NATの常駐固定費がかかり、利用ゼロでも月1.5万円前後かかる",
         "VPC・サブネット・セキュリティグループの設計と管理が必要",
         "スケールはオートスケーリング設定次第で、Lambdaほど瞬間的な追従はしない"
       ],
-      cost: "<strong>月1万円〜2万円程度</strong>（ALB約2,500円＋Fargate 0.25vCPU×2タスク常駐約6,000円＋NATゲートウェイ約5,000円＋転送量。アクセスゼロでもこの固定費が発生する）。",
+      cost: "<strong>月1.5万円〜2.5万円程度</strong>（ALB約2,500円＋Fargate 0.25vCPU×2タスク常駐約6,000円＋NATゲートウェイ約6,800円＋転送量。アクセスゼロでもこの固定費が発生する）。",
       references: [
         { title: "AWS Fargateとは", url: "https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/AWS_Fargate.html", note: "ECS公式開発者ガイド" },
         { title: "Application Load Balancerとは", url: "https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/application/introduction.html" },
@@ -196,6 +196,6 @@ registerCase({
       ]
     }
   ],
-  cost: "<p>推奨構成（サーバーレス）は<strong>月0円〜数千円</strong>で完全リクエスト比例。ALB+Fargate案は利用ゼロでも<strong>月1万円〜2万円程度</strong>の固定費がかかる代わりに実行時間制限がない。App Runner案はその中間で<strong>月1,500円〜1万円程度</strong>。「アイドル時にいくら払うか」が3案を分ける軸になる。</p>",
+  cost: "<p>推奨構成（サーバーレス）は<strong>月0円〜数千円</strong>で完全リクエスト比例。ALB+Fargate案は利用ゼロでも<strong>月1.5万円〜2.5万円程度</strong>の固定費がかかる代わりに実行時間制限がない。App Runner案はその中間で<strong>月1,500円〜1万円程度</strong>。「アイドル時にいくら払うか」が3案を分ける軸になる。</p>",
   summary: "<p>API Gateway + Lambda + DynamoDBは<strong>サーバーレスの最重要パターン</strong>で、以降のイベント駆動系ケースすべての土台になります。選定の分岐は明確で、処理が短時間・トラフィックが読めない・運用人員が少ないならサーバーレス一択。逆に<strong>「29秒/15分の制限」「コールドスタート」「常時接続」のどれかに引っかかった瞬間がコンテナ（ECS Fargate）を検討する合図</strong>です。その中間としてApp Runnerという「コンテナの手軽さ枠」があることも覚えておくと、チームのスキルセットに合わせた現実的な提案ができます。</p>"
 });

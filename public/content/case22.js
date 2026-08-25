@@ -12,7 +12,7 @@ registerCase({
     "重い集計クエリが本番サービスのDBに影響しないこと"
   ],
   main: {
-    name: "S3+Glue+Redshift+QuickSightのDWH構成",
+    name: "S3+Glue+Redshift+Quick SuiteのDWH構成",
     diagram: {
       cols: 6, rows: 2,
       groups: [
@@ -23,7 +23,7 @@ registerCase({
         { id: "s3", icon: "services/s3", label: "S3\nデータレイク", col: 1, row: 1 },
         { id: "glue", icon: "services/glue", label: "Glue\nETLジョブ", col: 2, row: 0 },
         { id: "rs", icon: "services/redshift", label: "Redshift\nDWH", col: 3, row: 1 },
-        { id: "qs", icon: "services/quicksight", label: "QuickSight\nBI", col: 4, row: 1 },
+        { id: "qs", icon: "services/quicksight", label: "Quick Suite\nBI", col: 4, row: 1 },
         { id: "analyst", icon: "resources/users", label: "経営層・\n分析担当", col: 5, row: 1 }
       ],
       edges: [
@@ -38,20 +38,20 @@ registerCase({
       "各業務システムのデータを日次でS3（データレイク＝生データの一元置き場）に集約する",
       "GlueのETLジョブが生データを抽出・変換（クレンジングや結合）し、Redshiftにロードする。ETLとはExtract（抽出）・Transform（変換）・Load（書き込み）の頭文字",
       "Redshift（DWH：分析専用に列指向で最適化されたデータベース）が数億行規模の集計クエリを高速に処理する",
-      "QuickSight（BIツール）がRedshiftにクエリを投げ、グラフやダッシュボードとして可視化する",
+      "Amazon Quick Suite（旧QuickSight。BIツール）がRedshiftにクエリを投げ、グラフやダッシュボードとして可視化する",
       "経営層・分析担当はブラウザでダッシュボードを開くだけ。SQLを書く必要がない"
     ],
     services: [
       { icon: "services/s3", name: "Amazon S3", role: "各システムから吸い上げた生データの置き場（データレイク）。変換に失敗してもやり直せる原本置き場" },
       { icon: "services/glue", name: "AWS Glue", role: "サーバーレスのETLサービス。生データの整形・結合とRedshiftへのロードをジョブとして実行する" },
       { icon: "services/redshift", name: "Amazon Redshift", role: "DWH本体。列指向ストレージと並列処理で、行指向の通常DBが苦手な大量データ集計を高速にこなす" },
-      { icon: "services/quicksight", name: "Amazon QuickSight", role: "BIツール。ダッシュボード作成・共有と、SPICEというインメモリキャッシュによる高速表示を担当" }
+      { icon: "services/quicksight", name: "Amazon Quick Suite（旧QuickSight）", role: "BIツール。ダッシュボード作成・共有と、SPICEというインメモリキャッシュによる高速表示を担当" }
     ],
     points: [
       "本番DBと分析基盤を完全に分けることで、重い集計が本番サービスの性能に影響しない。DWHを立てる一番の理由がこれ",
       "S3に生データを必ず残す。変換ロジックを間違えても原本から再実行できる「元データは消さない」がデータ基盤の鉄則",
       "Redshiftは専有クラスタを常時起動すると高額になりやすい。夜間ロード＋日中参照の使い方なら、使った時間だけ課金されるRedshift Serverlessを第一候補にする",
-      "QuickSightのSPICE（インメモリキャッシュ）に集計結果を取り込めば、閲覧のたびにRedshiftへクエリが飛ばず、費用と表示速度の両方が改善する"
+      "Quick SuiteのSPICE（インメモリキャッシュ）に集計結果を取り込めば、閲覧のたびにRedshiftへクエリが飛ばず、費用と表示速度の両方が改善する"
     ],
     pros: [
       "数TB級まで見据えてスケールできる王道構成",
@@ -64,7 +64,7 @@ registerCase({
       "Redshiftの費用は正直高い。専有クラスタ常時起動なら月10万円超も普通",
       "日次バッチの運用（ジョブ失敗時の検知・再実行）が必要になる"
     ],
-    cost: "<strong>月4万円〜15万円程度</strong>（Redshift Serverlessを1日数時間の集計に使用＋QuickSight作成者2名・閲覧者10名＋データ数百GBの前提）。費用の大半はRedshiftで、専有クラスタを常時起動すると月10万円を超えることも珍しくない。Serverless化と夜間停止が最大の節約ポイント。",
+    cost: "<strong>月4万円〜15万円程度</strong>（Redshift Serverlessを1日数時間の集計に使用＋Quick Suite作成者2名・閲覧者10名＋データ数百GBの前提）。費用の大半はRedshiftで、専有クラスタを常時起動すると月10万円を超えることも珍しくない。Serverless化と夜間停止が最大の節約ポイント。",
     references: [
       { title: "Amazon Redshift Serverlessとは", url: "https://docs.aws.amazon.com/ja_jp/redshift/latest/mgmt/serverless-whatis.html", note: "使った時間だけ課金されるRedshift" },
       { title: "AWS Glueとは", url: "https://docs.aws.amazon.com/ja_jp/glue/latest/dg/what-is-glue.html" },
@@ -75,7 +75,7 @@ registerCase({
   },
   alternatives: [
     {
-      name: "Athena+QuickSight（スモールスタート）",
+      name: "Athena+Quick Suite（スモールスタート）",
       when: "データが数十〜数百GBで閲覧頻度も低く、まず低コストで始めたい場合",
       diagram: {
         cols: 5, rows: 2,
@@ -86,7 +86,7 @@ registerCase({
           { id: "s3", icon: "services/s3", label: "S3\nデータレイク", col: 1, row: 0 },
           { id: "athena", icon: "services/athena", label: "Athena\nSQLエンジン", col: 2, row: 0 },
           { id: "catalog", icon: "services/glue", label: "Glue Data\nCatalog", col: 2, row: 1 },
-          { id: "qs", icon: "services/quicksight", label: "QuickSight\nBI", col: 3, row: 0 },
+          { id: "qs", icon: "services/quicksight", label: "Quick Suite\nBI", col: 3, row: 0 },
           { id: "analyst", icon: "resources/users", label: "分析担当", col: 4, row: 0 }
         ],
         edges: [
@@ -100,13 +100,13 @@ registerCase({
         "データはS3に置いたまま動かさない。DWHへのロードという工程自体をなくす",
         "Athena（S3上のファイルに直接SQLを実行できるサーバーレスのクエリサービス）が、必要なときだけデータをスキャンする",
         "Glue Data CatalogがS3上のファイルの「テーブル定義」（列名や型）を管理し、Athenaはそれを見てSQLを解釈する",
-        "QuickSightがAthena経由でクエリし、ダッシュボードとして可視化する"
+        "Quick Suite（旧QuickSight）がAthena経由でクエリし、ダッシュボードとして可視化する"
       ],
       services: [
         { icon: "services/athena", name: "Amazon Athena", role: "S3のファイルへ直接SQLを実行。サーバーを持たず、スキャンしたデータ量だけの課金" },
         { icon: "services/s3", name: "Amazon S3", role: "データの保管場所。この構成では保管と分析対象を兼ねる" },
         { icon: "services/glue", name: "AWS Glue Data Catalog", role: "S3上のデータをSQLの「テーブル」として見せるためのメタデータ管理" },
-        { icon: "services/quicksight", name: "Amazon QuickSight", role: "BIツール。接続先がRedshiftからAthenaに変わるだけで使い方は同じ" }
+        { icon: "services/quicksight", name: "Amazon Quick Suite（旧QuickSight）", role: "BIツール。接続先がRedshiftからAthenaに変わるだけで使い方は同じ" }
       ],
       points: [
         "常時起動のサーバーが1台もないため、クエリしていない時間の費用はS3の保存料だけになる",
@@ -121,7 +121,7 @@ registerCase({
         "クエリ応答は数秒〜数十秒。対話的な深掘り分析にはストレスがある",
         "スキャン量課金のため、雑な全件クエリを繰り返すと思わぬ課金になる"
       ],
-      cost: "<strong>月数百円〜1万円程度</strong>（データ数百GB・スキャン月数TB以内＋QuickSightライセンスの前提）。Athenaはスキャン1TBあたり約5USDの完全従量課金で、使わない月はほぼゼロになるのが最大の強み。",
+      cost: "<strong>月数百円〜1万円程度</strong>（データ数百GB・スキャン月数TB以内＋Quick Suiteライセンスの前提）。Athenaはスキャン1TBあたり約5USDの完全従量課金で、使わない月はほぼゼロになるのが最大の強み。",
       references: [
         { title: "Amazon Athenaとは", url: "https://docs.aws.amazon.com/ja_jp/athena/latest/ug/what-is.html" },
         { title: "パーティション射影を使用したスキャン削減", url: "https://docs.aws.amazon.com/ja_jp/athena/latest/ug/partition-projection.html", note: "スキャン量＝費用を下げる定石" },
@@ -129,7 +129,7 @@ registerCase({
       ]
     },
     {
-      name: "Auroraリードレプリカ+QuickSight（既存DB流用）",
+      name: "Auroraリードレプリカ+Quick Suite（既存DB流用）",
       when: "分析したいデータが既にAurora/RDSにすべて入っていて、数十GB規模で横断集約も不要な場合",
       diagram: {
         cols: 7, rows: 2,
@@ -145,7 +145,7 @@ registerCase({
           { id: "app", icon: "services/ec2", label: "既存Web\nアプリ", col: 3, row: 0 },
           { id: "primary", icon: "services/aurora", label: "Aurora\nプライマリ", col: 4, row: 0 },
           { id: "replica", icon: "services/aurora", label: "Aurora\nリードレプリカ", col: 4, row: 1 },
-          { id: "qs", icon: "services/quicksight", label: "QuickSight\nBI", col: 5, row: 1 },
+          { id: "qs", icon: "services/quicksight", label: "Quick Suite\nBI", col: 5, row: 1 },
           { id: "analyst", icon: "resources/users", label: "分析担当", col: 6, row: 1 }
         ],
         edges: [
@@ -160,17 +160,17 @@ registerCase({
       flow: [
         "既存Webアプリはこれまでどおりプライマリ（書き込み担当のDB本体）に読み書きする",
         "Auroraのリードレプリカ（読み取り専用の複製DB）を追加し、プライマリの内容が自動で同期される",
-        "QuickSightはVPC接続を使ってプライベートサブネット内のリードレプリカへ分析クエリを投げる",
+        "Quick Suite（旧QuickSight）はVPC接続を使ってプライベートサブネット内のリードレプリカへ分析クエリを投げる",
         "分析担当はQuickSightのダッシュボードを閲覧する。データはほぼリアルタイム"
       ],
       services: [
         { icon: "services/aurora", name: "Amazon Aurora", role: "既存のアプリDB。リードレプリカを追加するだけで分析用の読み取り口を分離できる" },
-        { icon: "services/quicksight", name: "Amazon QuickSight", role: "BIツール。VPC接続でプライベートなDBに安全にアクセスする" },
+        { icon: "services/quicksight", name: "Amazon Quick Suite（旧QuickSight）", role: "BIツール。VPC接続でプライベートなDBに安全にアクセスする" },
         { icon: "services/ec2", name: "Amazon EC2", role: "既存のWebアプリサーバー。この構成では変更しない" }
       ],
       points: [
         "重い分析クエリをレプリカに逃がし、本番の読み書きへの影響を断つ。この構成の目的はほぼこれに尽きる",
-        "QuickSightからVPC内のDBへは「VPC接続」を設定する。DBをインターネットに公開する必要はない",
+        "Quick SuiteからVPC内のDBへは「VPC接続」を設定する。DBをインターネットに公開する必要はない",
         "Auroraは行指向DBなので大規模集計は苦手。データが数百GBを超えたり集計が分単位に遅くなってきたら、推奨構成（DWH）への移行を検討するサイン"
       ],
       pros: [
@@ -190,5 +190,5 @@ registerCase({
     }
   ],
   cost: "<p>推奨構成（Redshift）は<strong>月4万円〜15万円程度</strong>で、費用の大半をDWHの稼働費が占める。Athena案は<strong>月数百円〜1万円程度</strong>と圧倒的に安く、待機費用がない。Auroraレプリカ案は<strong>月1.5万円〜4万円程度</strong>でETL開発費が不要。判断の分かれ目は「データ量」「閲覧の頻度と同時人数」「横断分析の要否」の3つで、迷ったらAthenaで始めて成長に合わせてRedshiftへ昇格するのが安全。</p>",
-  summary: "<p>BIダッシュボードの裏側は「データをどこに集めて、何で集計するか」の選択です。<strong>王道はS3に集めてRedshiftで集計する構成</strong>ですが、DWHは常時稼働費が高いため、規模が小さいうちはAthenaのスキャン課金モデルが合理的です。重要なのは、どの案でも<strong>S3に生データを残しておけば後から乗り換えられる</strong>こと。最初の設計で決め切るのではなく、成長段階に応じて昇格できる形にしておくのがデータ基盤設計の勘所です。</p>"
+  summary: "<p>BIダッシュボードの裏側は「データをどこに集めて、何で集計するか」の選択です。<strong>王道はS3に集めてRedshiftで集計する構成</strong>ですが、DWHは常時稼働費が高いため、規模が小さいうちはAthenaのスキャン課金モデルが合理的です。重要なのは、どの案でも<strong>S3に生データを残しておけば後から乗り換えられる</strong>こと。最初の設計で決め切るのではなく、成長段階に応じて昇格できる形にしておくのがデータ基盤設計の勘所です。なお、BIツールのQuickSightは2025年10月に<strong>Amazon Quick Suite</strong>へ改称されました（BI機能はQuick Sightの表記）。SAA試験では旧称のQuickSightで出題される場合があるため、両方の名前を覚えておきましょう。</p>"
 });

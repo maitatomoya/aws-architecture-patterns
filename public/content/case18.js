@@ -188,7 +188,7 @@ registerCase({
         "VPC設計・コンテナのデプロイ運用・スケーリング設定など運用負担が最も重い",
         "急増対応はオートスケーリングの設定次第で、サーバーレスほど自動ではない"
       ],
-      cost: "<strong>月1.5万円〜4万円程度</strong>（ALB約3,000円+Fargate 2タスク常駐約3,500円+NATゲートウェイ約6,500円+通信量。トラフィックが少ないなら明確に割高）。",
+      cost: "<strong>月1.5万円〜4万円程度</strong>（ALB約3,000円+Fargate 2タスク常駐約3,500円+NATゲートウェイ月約45USD（約6,800円）+通信量。トラフィックが少ないなら明確に割高）。",
       references: [
         { title: "Application Load Balancerとは", url: "https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/application/introduction.html" },
         { title: "Amazon ECSとは", url: "https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/Welcome.html" },

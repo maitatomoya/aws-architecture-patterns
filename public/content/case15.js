@@ -135,7 +135,7 @@ registerCase({
         "起動に数十秒〜数分かかるため、秒単位の応答が必要なジョブには不向き",
         "VPC・サブネットのネットワーク設計が必要になる"
       ],
-      cost: "<strong>実行時間に比例して月数百円〜数千円</strong>（例：4vCPU/8GBのFargateを毎日1時間で約900円/月。スポットなら更に安い。NATゲートウェイを置く場合は固定費約5,000円/月が加算）。",
+      cost: "<strong>実行時間に比例して月数百円〜数千円</strong>（例：4vCPU/8GBのFargateを毎日1時間で約900円/月。スポットなら更に安い。NATゲートウェイを置く場合は固定費月約45USD（約6,800円）が加算）。",
       references: [
         { title: "AWS Batchとは", url: "https://docs.aws.amazon.com/ja_jp/batch/latest/userguide/what-is-batch.html", note: "Batch公式ユーザーガイド" },
         { title: "AWS Fargateとは", url: "https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/AWS_Fargate.html" },
@@ -201,6 +201,6 @@ registerCase({
       ]
     }
   ],
-  cost: "<p>推奨構成（SQS+Lambda）は<strong>月0円〜数百円</strong>でジョブ量に完全比例。Batch案はジョブ実行時間ぶんだけの課金で<strong>月数百円〜数千円</strong>（NAT利用時は固定費約5,000円が加算）。Amazon MQ案はブローカー常時起動のため<strong>月4,000円〜</strong>の固定費がかかる。</p>",
+  cost: "<p>推奨構成（SQS+Lambda）は<strong>月0円〜数百円</strong>でジョブ量に完全比例。Batch案はジョブ実行時間ぶんだけの課金で<strong>月数百円〜数千円</strong>（NAT利用時は固定費月約45USD（約6,800円）が加算）。Amazon MQ案はブローカー常時起動のため<strong>月4,000円〜</strong>の固定費がかかる。</p>",
   summary: "<p>「重い処理はキューに逃がして即応答」は、Webサービスの体感速度と信頼性を同時に上げる<strong>バックエンド設計の基本技</strong>です。このケースの本質は3点。(1)キューがあることで発行側と処理側が疎結合になり、障害と負荷を吸収できる。(2)<strong>DLQと冪等性はキュー処理の必須セット</strong>で、後付けではなく最初から設計に入れる。(3)ワーカーの選択は処理の重さで決まる（15分以内ならLambda、超えるならBatch、プロトコル互換が要るならAmazon MQ）。この考え方は次の定期バッチやイベント駆動ケースにもそのままつながります。</p>"
 });

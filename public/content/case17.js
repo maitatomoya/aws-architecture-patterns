@@ -188,9 +188,9 @@ registerCase({
       cons: [
         "タスク起動に数十秒かかり、小さい画像の大量処理ではLambdaより遅く割高",
         "VPC・サブネット・NATなどネットワーク設計が必要になり、構成の難易度が上がる",
-        "NATゲートウェイは起動しているだけで月約6,500円かかる（VPCエンドポイントで削減可能）"
+        "NATゲートウェイは起動しているだけで月約45USD（約6,800円）かかる（VPCエンドポイントで削減可能）"
       ],
-      cost: "<strong>月7,000円〜3万円程度</strong>（月1万件・1件5分・0.5vCPUの前提でFargate分が約2,000円。NATゲートウェイの固定費約6,500円が支配的なので、VPCエンドポイント化が効く）。",
+      cost: "<strong>月7,000円〜3万円程度</strong>（月1万件・1件5分・0.5vCPUの前提でFargate分が約2,000円。NATゲートウェイの固定費月約45USD（約6,800円）が支配的なので、VPCエンドポイント化が効く）。",
       references: [
         { title: "AWS Fargateとは（Amazon ECS）", url: "https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/AWS_Fargate.html" },
         { title: "Amazon EventBridgeを使用したS3イベント通知", url: "https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/EventBridge.html", note: "S3イベントでECSタスクを起動する入口" },
@@ -198,6 +198,6 @@ registerCase({
       ]
     }
   ],
-  cost: "<p>推奨構成（S3+Lambda+DynamoDB）は<strong>月数百円〜数千円</strong>で、使わない時間は課金されない。Step Functions案は状態遷移課金が上乗せされて<strong>月1,000円〜5,000円程度</strong>。Fargate案は処理自体の課金は小さくても<strong>NATゲートウェイの固定費約6,500円</strong>が乗り、月7,000円〜となる。処理1件の重さがコスト構造を決める点に注目。</p>",
+  cost: "<p>推奨構成（S3+Lambda+DynamoDB）は<strong>月数百円〜数千円</strong>で、使わない時間は課金されない。Step Functions案は状態遷移課金が上乗せされて<strong>月1,000円〜5,000円程度</strong>。Fargate案は処理自体の課金は小さくても<strong>NATゲートウェイの固定費月約45USD（約6,800円）</strong>が乗り、月7,000円〜となる。処理1件の重さがコスト構造を決める点に注目。</p>",
   summary: "<p>「S3に置かれたら自動で処理」はイベント駆動の入門にして最頻出パターンです。<strong>まずはS3イベント+Lambdaの最小構成で始め、工程が増えたらStep Functions、1件が重くなったらFargate</strong>、という進化の道筋ごと覚えておくと設計判断が速くなります。分岐点は「工程の数」と「1件あたりの処理時間」。また、変換結果を同じバケットに書き戻して無限ループさせる事故は現場で本当に起きるので、入出力の分離は最初から徹底しましょう。</p>"
 });

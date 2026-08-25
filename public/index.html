@@ -11,11 +11,16 @@
     <aside id="sidebar">
       <header id="sidebar-header">
         <h1>AWS Architecture Patterns</h1>
-        <div id="progress-wrap">
-          <div id="progress-bar"><div id="progress-fill"></div></div>
+        <div id="progress-wrap" title="読了チェックはこのブラウザにのみ保存されます">
+          <div id="progress-bar" role="progressbar" aria-label="読了ケース数"
+               aria-valuemin="0" aria-valuemax="50" aria-valuenow="0"><div id="progress-fill"></div></div>
           <span id="progress-label">0 / 0</span>
         </div>
       </header>
+      <div id="toc-search-wrap">
+        <input type="search" id="toc-search" placeholder="ケースを検索（サービス名でも）"
+               aria-label="ケースを検索（サービス名でも）" autocomplete="off">
+      </div>
       <nav id="toc" aria-label="ケース一覧"></nav>
       <footer id="sidebar-footer">
         <span>図はAWS公式Architecture Iconsで作成</span>
@@ -29,60 +34,60 @@
       </div>
     </main>
   </div>
-  <script src="app-register.js"></script>
-  <script src="content/intro.js"></script>
-  <script src="content/resources.js"></script>
-  <script src="content/case01.js"></script>
-  <script src="content/case02.js"></script>
-  <script src="content/case03.js"></script>
-  <script src="content/case04.js"></script>
-  <script src="content/case05.js"></script>
-  <script src="content/case06.js"></script>
-  <script src="content/case07.js"></script>
-  <script src="content/case08.js"></script>
-  <script src="content/case09.js"></script>
-  <script src="content/case10.js"></script>
-  <script src="content/case11.js"></script>
-  <script src="content/case12.js"></script>
-  <script src="content/case13.js"></script>
-  <script src="content/case14.js"></script>
-  <script src="content/case15.js"></script>
-  <script src="content/case16.js"></script>
-  <script src="content/case17.js"></script>
-  <script src="content/case18.js"></script>
-  <script src="content/case19.js"></script>
-  <script src="content/case20.js"></script>
-  <script src="content/case21.js"></script>
-  <script src="content/case22.js"></script>
-  <script src="content/case23.js"></script>
-  <script src="content/case24.js"></script>
-  <script src="content/case25.js"></script>
-  <script src="content/case26.js"></script>
-  <script src="content/case27.js"></script>
-  <script src="content/case28.js"></script>
-  <script src="content/case29.js"></script>
-  <script src="content/case30.js"></script>
-  <script src="content/case31.js"></script>
-  <script src="content/case32.js"></script>
-  <script src="content/case33.js"></script>
-  <script src="content/case34.js"></script>
-  <script src="content/case35.js"></script>
-  <script src="content/case36.js"></script>
-  <script src="content/case37.js"></script>
-  <script src="content/case38.js"></script>
-  <script src="content/case39.js"></script>
-  <script src="content/case40.js"></script>
-  <script src="content/case41.js"></script>
-  <script src="content/case42.js"></script>
-  <script src="content/case43.js"></script>
-  <script src="content/case44.js"></script>
-  <script src="content/case45.js"></script>
-  <script src="content/case46.js"></script>
-  <script src="content/case47.js"></script>
-  <script src="content/case48.js"></script>
-  <script src="content/case49.js"></script>
-  <script src="content/case50.js"></script>
-  <script src="diagram.js"></script>
-  <script src="app.js"></script>
+  <script defer src="app-register.js"></script>
+  <script defer src="content/intro.js"></script>
+  <script defer src="content/resources.js"></script>
+  <script defer src="content/case01.js"></script>
+  <script defer src="content/case02.js"></script>
+  <script defer src="content/case03.js"></script>
+  <script defer src="content/case04.js"></script>
+  <script defer src="content/case05.js"></script>
+  <script defer src="content/case06.js"></script>
+  <script defer src="content/case07.js"></script>
+  <script defer src="content/case08.js"></script>
+  <script defer src="content/case09.js"></script>
+  <script defer src="content/case10.js"></script>
+  <script defer src="content/case11.js"></script>
+  <script defer src="content/case12.js"></script>
+  <script defer src="content/case13.js"></script>
+  <script defer src="content/case14.js"></script>
+  <script defer src="content/case15.js"></script>
+  <script defer src="content/case16.js"></script>
+  <script defer src="content/case17.js"></script>
+  <script defer src="content/case18.js"></script>
+  <script defer src="content/case19.js"></script>
+  <script defer src="content/case20.js"></script>
+  <script defer src="content/case21.js"></script>
+  <script defer src="content/case22.js"></script>
+  <script defer src="content/case23.js"></script>
+  <script defer src="content/case24.js"></script>
+  <script defer src="content/case25.js"></script>
+  <script defer src="content/case26.js"></script>
+  <script defer src="content/case27.js"></script>
+  <script defer src="content/case28.js"></script>
+  <script defer src="content/case29.js"></script>
+  <script defer src="content/case30.js"></script>
+  <script defer src="content/case31.js"></script>
+  <script defer src="content/case32.js"></script>
+  <script defer src="content/case33.js"></script>
+  <script defer src="content/case34.js"></script>
+  <script defer src="content/case35.js"></script>
+  <script defer src="content/case36.js"></script>
+  <script defer src="content/case37.js"></script>
+  <script defer src="content/case38.js"></script>
+  <script defer src="content/case39.js"></script>
+  <script defer src="content/case40.js"></script>
+  <script defer src="content/case41.js"></script>
+  <script defer src="content/case42.js"></script>
+  <script defer src="content/case43.js"></script>
+  <script defer src="content/case44.js"></script>
+  <script defer src="content/case45.js"></script>
+  <script defer src="content/case46.js"></script>
+  <script defer src="content/case47.js"></script>
+  <script defer src="content/case48.js"></script>
+  <script defer src="content/case49.js"></script>
+  <script defer src="content/case50.js"></script>
+  <script defer src="diagram.js"></script>
+  <script defer src="app.js"></script>
 </body>
 </html>

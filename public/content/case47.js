@@ -30,9 +30,9 @@ registerCase({
         { id: "insp", icon: "services/inspector", label: "Inspector\n脆弱性診断", col: 1, row: 1 }
       ],
       edges: [
-        { from: "ec2", to: "ct", label: "操作ログ", dashed: true },
+        { from: "ec2", to: "ct", label: "API操作を記録", dashed: true },
         { from: "insp", to: "ec2", label: "脆弱性スキャン" },
-        { from: "ct", to: "gd", label: "証跡を分析" },
+        { from: "ct", to: "gd", label: "自動取り込み", dashed: true },
         { from: "gd", to: "eb", label: "検知イベント" },
         { from: "insp", to: "eb", label: "検出イベント" },
         { from: "eb", to: "sns", label: "ルールで通知へ" },
@@ -40,8 +40,8 @@ registerCase({
       ]
     },
     flow: [
-      "CloudTrailがAWSアカウント内のすべてのAPI操作（コンソール操作・CLI・SDK）を記録し続ける",
-      "GuardDutyがCloudTrailの証跡・VPCフローログ・DNSログを機械学習で分析し、「普段と違う怪しい動き」（不正ログイン試行、仮想通貨マイニング通信など）を検知する",
+      "CloudTrailがAWSアカウント内のすべてのAPI操作（コンソール操作・CLI・SDK）を記録し続ける。CloudTrailが記録するのはAWS APIの呼び出しであり、EC2のOS内部で実行したコマンドなどOS内の操作は対象外",
+      "GuardDutyは有効化するだけで、CloudTrailの管理イベント・VPCフローログ・DNSログを独立した経路で自動取り込みして機械学習で分析し、「普段と違う怪しい動き」（不正ログイン試行、仮想通貨マイニング通信など）を検知する。CloudTrail側で証跡を作るなどの事前設定は不要（図の破線はこの自動取り込みを表す）",
       "InspectorがEC2を継続的にスキャンし、OSやソフトウェアの既知の脆弱性（CVE）を検出する",
       "GuardDutyとInspectorの検知結果はEventBridgeにイベントとして流れ、ルール（重要度が高いものだけ等）に一致したらSNSへ振り分けられる",
       "SNSが運用担当者へメールやチャット連携で即時通知する。人は通知が来たときだけ動けばよい"
@@ -58,7 +58,8 @@ registerCase({
       "GuardDuty・CloudTrail・Inspector・EventBridge・SNSはすべてVPCの外にあるマネージドサービス。監視のためのサーバーを1台も持たないので、監視基盤自体の運用負荷がほぼゼロになる",
       "この図にインターネットゲートウェイが無いのは、ユーザー向け通信ではなく監視の流れだけを描いているため。実際のEC2にはWebアクセス経路（別ケース参照）が別途ある",
       "EventBridgeのルールで「重要度High以上のみ通知」と絞るのが実運用のコツ。全部通知すると狼少年化（通知疲れで誰も見なくなる状態）して形骸化する",
-      "CloudTrailの証跡はS3に保管し、削除できない設定（MFA削除保護やログ用アカウント分離）にすると、攻撃者による証拠隠滅にも備えられる"
+      "CloudTrailの証跡はS3に保管し、削除できない設定（MFA削除保護やログ用アカウント分離）にすると、攻撃者による証拠隠滅にも備えられる",
+      "要件の「設定ミスに気づく」は脅威検知とは別の領域である点に注意。S3バケットの公開設定ミスやセキュリティグループの開けすぎといった設定ミスの検知は、AWS ConfigやSecurity Hub（CSPM：クラウド設定を継続的にチェックする仕組み）の担当で、この構成に次の一歩として足すのが定番"
     ],
     pros: [
       "全サービスが有効化するだけで動くマネージド型。専任者なしでも回る",
@@ -71,7 +72,7 @@ registerCase({
       "料金がログ分析量に比例するため、大規模環境では事前見積もりが必要",
       "検知ルールはAWSまかせで、自社固有の業務ルール（深夜の特定操作を禁止等）の検知は苦手"
     ],
-    cost: "<strong>月3,000円〜1万円程度</strong>（中小規模の目安。GuardDutyは分析対象ログ量、InspectorはスキャンするEC2台数、CloudTrailは管理イベント1系統無料＋S3保管料の従量課金。EC2数台＋通常のログ量なら数千円に収まることが多い。30日間の無料トライアルで実額を確認してから本採用できる）",
+    cost: "<strong>月3,000円〜1万円程度</strong>（中小規模の目安。GuardDutyは分析対象ログ量、InspectorはスキャンするEC2台数、CloudTrailは管理イベント1系統無料＋S3保管料の従量課金。EC2数台＋通常のログ量なら数千円に収まることが多い。無料トライアル（GuardDutyは30日間、Inspectorは15日間）で実額を確認してから本採用できる）",
     references: [
       { title: "Amazon GuardDutyとは", url: "https://docs.aws.amazon.com/ja_jp/guardduty/latest/ug/what-is-guardduty.html", note: "脅威検知の仕組みと検知対象の一覧" },
       { title: "AWS CloudTrailとは", url: "https://docs.aws.amazon.com/ja_jp/awscloudtrail/latest/userguide/cloudtrail-user-guide.html", note: "操作証跡の記録の基本" },

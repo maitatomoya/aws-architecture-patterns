@@ -71,6 +71,7 @@
   var introShown = false;
   var resourcesShown = false;
   var glossaryShown = false;
+  var patternsShown = false;
 
   // カテゴリ名 → 開閉状態。renderTocの全再構築後も開閉状態を引き継ぐ。
   // toggleイベントは非同期発火で検索中の自動オープンを誤記録するレースがあるため、
@@ -199,6 +200,10 @@
       a.textContent = label;
       elToc.appendChild(a);
       appendixAdded = true;
+    }
+    // 設計パターン名鑑は学習コンテンツ寄りなので付録の先頭に置く
+    if (window.AWS_PATTERN_CATALOG) {
+      addAppendixLink("#patterns", window.AWS_PATTERN_CATALOG.tocTitle || "設計パターン名鑑", patternsShown);
     }
     if (window.AWS_RESOURCES) {
       addAppendixLink("#resources", window.AWS_RESOURCES.tocTitle || "参考資料リスト", resourcesShown);
@@ -329,6 +334,7 @@
     introShown = false;
     resourcesShown = false;
     glossaryShown = false;
+    patternsShown = false;
     state.lastCase = id;
     saveState();
     // 別カテゴリへの遷移時は、移動先のカテゴリを開いて現在地を見せる
@@ -396,6 +402,7 @@
     introShown = true;
     resourcesShown = false;
     glossaryShown = false;
+    patternsShown = false;
     current = null;
     elView.hidden = true;
     elWelcome.hidden = false;
@@ -422,6 +429,7 @@
     resourcesShown = true;
     introShown = false;
     glossaryShown = false;
+    patternsShown = false;
     current = null;
     elView.hidden = true;
     elWelcome.hidden = false;
@@ -447,6 +455,7 @@
     glossaryShown = true;
     introShown = false;
     resourcesShown = false;
+    patternsShown = false;
     current = null;
     elView.hidden = true;
     elWelcome.hidden = false;
@@ -539,12 +548,148 @@
     focusHeading(elWelcome);
   }
 
+  /**
+   * 設計パターン名鑑ページ。会話やレビューに登場する「名前のついたパターン」を
+   * 名前から引けるようにする。用語集と同じく、ページ内の検索欄で
+   * 名前・英語名・説明・AWSでの定番実装を横断して絞り込める。
+   */
+  function showPatternCatalog() {
+    var catalog = window.AWS_PATTERN_CATALOG;
+    if (!catalog) return;
+    patternsShown = true;
+    introShown = false;
+    resourcesShown = false;
+    glossaryShown = false;
+    current = null;
+    elView.hidden = true;
+    elWelcome.hidden = false;
+
+    var title = catalog.tocTitle || "設計パターン名鑑";
+    var groups = (catalog.groups || []).filter(function (g) {
+      return g && g.patterns && g.patterns.length;
+    });
+    var entryCount = 0;
+    var html = '<div class="intro-page pattern-page">';
+    html += "<h2>" + title + "</h2>";
+    if (catalog.lead) html += '<div class="pattern-lead">' + catalog.lead + "</div>";
+    html += '<div class="glossary-search-wrap">' +
+      '<label for="pattern-search">パターンをしぼり込む</label>' +
+      '<input type="search" id="pattern-search" autocomplete="off"' +
+      ' placeholder="名前や説明で検索（例：キュー、Saga、DynamoDB）">' +
+      '<p id="pattern-count" role="status" aria-live="polite"></p>' +
+      "</div>";
+    // 分類へのジャンプ。hashを書き換えると「いま名鑑を開いている」状態を失うため、
+    // アンカーリンクではなくボタンでスクロールさせる
+    html += '<nav class="pattern-groups-nav" aria-label="分類へ移動"><ul>' + groups.map(function (g, gi) {
+      return '<li><button type="button" class="mini-btn pattern-jump" data-group="' + gi + '">' +
+        h(g.name) + "</button></li>";
+    }).join("") + "</ul></nav>";
+
+    groups.forEach(function (g, gi) {
+      html += '<section class="pattern-group" id="pattern-group-' + gi + '">' +
+        '<h3 tabindex="-1">' + h(g.name) + "</h3>";
+      g.patterns.forEach(function (p) {
+        if (!p || !p.name) return;
+        entryCount++;
+        // 検索対象（名前・英語名・AWSでの実装・説明）を属性に持たせ、絞り込みをDOM操作だけで完結させる
+        var haystack = [p.name, p.en || "", p.aws || "", String(p.desc || "").replace(/<[^>]*>/g, "")]
+          .join(" ").toLowerCase();
+        html += '<article class="pattern-entry" data-search="' + escAttr(haystack) + '">';
+        html += '<h4 class="pe-name">' + h(p.name) +
+          (p.en ? ' <span class="pe-en">' + h(p.en) + "</span>" : "") + "</h4>";
+        html += '<div class="pe-desc">' + linkCaseRefs(h(p.desc)) + "</div>";
+        if (p.aws) {
+          html += '<p class="pe-aws"><span class="pe-label">AWSでの定番実装</span>' + h(p.aws) + "</p>";
+        }
+        var caseIds = (p.cases || []).filter(function (n) { return caseById[n]; });
+        if (caseIds.length) {
+          html += '<p class="pe-cases"><span class="pe-label">登場するケース</span>' + caseIds.map(function (n) {
+            return '<a href="#case-' + n + '">ケース' + n + " " + h(caseById[n].title) + "</a>";
+          }).join("／") + "</p>";
+        }
+        if (p.references && p.references.length) {
+          html += '<p class="pe-refs"><span class="pe-label">もっと知る</span>' + p.references.map(function (r) {
+            return '<a href="' + escAttr(r.url) + '" target="_blank" rel="noopener noreferrer">' +
+              h(r.title) + "</a>";
+          }).join("／") + "</p>";
+        }
+        html += "</article>";
+      });
+      html += "</section>";
+    });
+    if (entryCount === 0) {
+      html += "<p>パターンがまだ登録されていません。</p>";
+    }
+    html += '<p class="glossary-empty" hidden>一致するパターンはありません。別の言い方で探してみてください。</p>';
+    if (catalog.updated) {
+      html += '<p class="resources-checked">掲載リンクは' + h(catalog.updated) + "時点で全件アクセス確認済みです。</p>";
+    }
+    html += "</div>";
+
+    elWelcome.innerHTML = "";
+    var page = document.createElement("div");
+    page.innerHTML = html;
+    elWelcome.appendChild(page);
+
+    var input = $("pattern-search");
+    var countEl = $("pattern-count");
+    var emptyEl = page.querySelector(".glossary-empty");
+    var groupNav = page.querySelector(".pattern-groups-nav");
+    var entryEls = Array.prototype.slice.call(page.querySelectorAll(".pattern-entry"));
+    var groupEls = Array.prototype.slice.call(page.querySelectorAll(".pattern-group"));
+
+    function applyFilter() {
+      var q = input.value.trim().toLowerCase();
+      var shown = 0;
+      entryEls.forEach(function (el) {
+        var hit = q === "" || el.getAttribute("data-search").indexOf(q) !== -1;
+        el.hidden = !hit;
+        if (hit) shown++;
+      });
+      // 全件が隠れた分類は見出しごと隠す。絞り込み中は分類ジャンプも意味が薄いので隠す
+      groupEls.forEach(function (g) {
+        var any = Array.prototype.some.call(g.querySelectorAll(".pattern-entry"), function (el) {
+          return !el.hidden;
+        });
+        g.hidden = !any;
+      });
+      if (groupNav) groupNav.hidden = q !== "";
+      if (emptyEl) emptyEl.hidden = shown !== 0;
+      countEl.textContent = q === ""
+        ? "全" + entryCount + "件"
+        : shown + "件 / 全" + entryCount + "件";
+    }
+    if (input) {
+      applyFilter();
+      input.addEventListener("input", applyFilter);
+    }
+
+    Array.prototype.forEach.call(page.querySelectorAll(".pattern-jump"), function (btn) {
+      btn.addEventListener("click", function () {
+        var target = $("pattern-group-" + btn.getAttribute("data-group"));
+        if (!target) return;
+        target.scrollIntoView({ block: "start" });
+        var heading = target.querySelector("h3");
+        if (heading) {
+          try { heading.focus({ preventScroll: true }); } catch (e) { heading.focus(); }
+        }
+      });
+    });
+
+    renderToc();
+    setTitle(title);
+    window.scrollTo(0, 0);
+    $("main").scrollTop = 0;
+    focusHeading(elWelcome);
+  }
+
   window.addEventListener("hashchange", function () {
     var m = location.hash.match(/^#case-(\d+)$/);
     if (m) showCase(Number(m[1]));
     else if (location.hash === "#intro") showIntro();
     else if (location.hash === "#resources") showResources();
     else if (location.hash === "#glossary") showGlossary();
+    else if (location.hash === "#patterns") showPatternCatalog();
   });
 
   // 他タブでの読了チェック変更を取り込んで表示へ反映する
@@ -782,6 +927,8 @@
       showResources();
     } else if (!m && location.hash === "#glossary" && window.AWS_GLOSSARY) {
       showGlossary();
+    } else if (!m && location.hash === "#patterns" && window.AWS_PATTERN_CATALOG) {
+      showPatternCatalog();
     } else if (!m && window.AWS_INTRO && (location.hash === "#intro" || !state.lastCase)) {
       showIntro();
       location.hash = "#intro";

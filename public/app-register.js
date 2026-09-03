@@ -6,6 +6,7 @@ window.AWS_CASES = [];
 window.AWS_INTRO = null;
 window.AWS_RESOURCES = null;
 window.AWS_GLOSSARY = null;
+window.AWS_PATTERN_CATALOG = null;
 
 function registerCase(c) {
   window.AWS_CASES.push(c);
@@ -21,4 +22,8 @@ function registerResources(r) {
 
 function registerGlossary(g) {
   window.AWS_GLOSSARY = g;
+}
+
+function registerPatternCatalog(catalog) {
+  window.AWS_PATTERN_CATALOG = catalog;
 }
